@@ -12,6 +12,9 @@
             "name": "Stevie Mayhew",
             "homepage": "https://www.stevie.co.nz"
         },
+        {
+            "name": "Uncle Cheese"
+        }
     ],
     "require": {
         "silverstripe/cms": "^4.0"
