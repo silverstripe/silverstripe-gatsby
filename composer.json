@@ -1,0 +1,26 @@
+{
+    "name": "stevie-mayhew/silverstripe-gatsby",
+    "description": "SilverStripe Gatsby base",
+    "type": "silverstripe-vendormodule",
+    "license": "MIT",
+    "keywords": [
+        "silverstripe",
+        "gatsby"
+    ],
+    "authors": [
+        {
+            "name": "Stevie Mayhew",
+            "homepage": "https://www.stevie.co.nz"
+        },
+    ],
+    "require": {
+        "silverstripe/cms": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "StevieMayhew\\Gatsby\\": "src/"
+        }
+    },
+    "minimum-stability": "dev",
+    "prefer-stable": true
+}

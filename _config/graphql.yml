@@ -1,0 +1,20 @@
+---
+Name: silverstripe-gatsby
+---
+SilverStripe\Control\Director:
+  rules:
+    'graphql': '%$SilverStripe\GraphQL\Controller.default'
+
+SilverStripe\GraphQL\Manager:
+  schemas:
+    default:
+      queries:
+        sync: 'StevieMayhew\Gatsby\GraphQL\Queries\GetPagesQueryCreator'
+      types:
+        SilverStripePage: 'StevieMayhew\Gatsby\GraphQL\Types\PageTypeCreator'
+
+SilverStripe\GraphQL\Controller:
+  cors:
+    Enabled: true
+    Allow-Origin:
+      - "*"
