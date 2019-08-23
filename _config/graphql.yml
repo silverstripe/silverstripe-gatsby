@@ -9,7 +9,7 @@ SilverStripe\GraphQL\Manager:
   schemas:
     default:
       queries:
-        sync: 'StevieMayhew\Gatsby\GraphQL\Queries\GetPagesQueryCreator'
+        sync: 'StevieMayhew\Gatsby\GraphQL\Queries\SyncQueryCreator'
       types:
         SilverStripePage: 'StevieMayhew\Gatsby\GraphQL\Types\PageTypeCreator'
 

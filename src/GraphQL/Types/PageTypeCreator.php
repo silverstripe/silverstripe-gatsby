@@ -33,7 +33,9 @@ class PageTypeCreator extends TypeCreator
 
         return [
             'ID' => ['type' => $int],
+            'ParentID' => ['type' => $int],
             'ErrorCode' => ['type' => $int],
+            'ClassName' => ['type' => $string],
             'MenuTitle' => ['type' => $string],
             'Title' => ['type' => $string],
             'Content' => ['type' => $string],
@@ -41,6 +43,7 @@ class PageTypeCreator extends TypeCreator
             "ShowInMenus" => ['type' => $boolean],
             "ShowInSearch" => ['type' => $boolean],
             "Sort" => ['type' => $int],
+            "URLSegment" => ['type' => $string],
         ];
     }
 }
