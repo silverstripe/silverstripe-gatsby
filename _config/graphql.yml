@@ -3,18 +3,28 @@ Name: silverstripe-gatsby
 ---
 SilverStripe\Control\Director:
   rules:
-    'graphql': '%$SilverStripe\GraphQL\Controller.default'
+    '__gatsby/graphql': '%$SilverStripe\GraphQL\Controller.gatsby'
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\GraphQL\Manager.gatsby:
+    class: SilverStripe\GraphQL\Manager
+    constructor:
+      identifier: gatsby
+    properties:
+      Middlewares:
+        CSRFMiddleware: '%$SilverStripe\GraphQL\Middleware\QueryMiddleware.csrf'
+        HTTPMethodMiddleware: '%$SilverStripe\GraphQL\Middleware\QueryMiddleware.httpMethod'
+  SilverStripe\GraphQL\Controller.gatsby:
+    class: SilverStripe\GraphQL\Controller
+    constructor:
+      manager: '%$SilverStripe\GraphQL\Manager.gatsby'
+
 
 SilverStripe\GraphQL\Manager:
   schemas:
-    default:
+    gatsby:
       queries:
         sync: 'StevieMayhew\Gatsby\GraphQL\Queries\SyncQueryCreator'
       types:
         SilverStripePage: 'StevieMayhew\Gatsby\GraphQL\Types\PageTypeCreator'
-
-SilverStripe\GraphQL\Controller:
-  cors:
-    Enabled: true
-    Allow-Origin:
-      - "*"
+        DataObjectInterface: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTypeCreator'
+        DataObjectTuple: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTupleTypeCreator'

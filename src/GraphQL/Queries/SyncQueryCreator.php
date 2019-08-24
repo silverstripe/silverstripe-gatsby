@@ -33,10 +33,20 @@ class SyncQueryCreator extends QueryCreator implements OperationResolver
     public function args()
     {
         return [
-            'ID' => [
+            'Limit' => [
                 'type' => Type::int(),
-                'description' => 'ID of Page to search for',
+                'description' => 'Limit the number of records returned',
+                'defaultValue' => 1000,
             ],
+            'Offset' => [
+                'type' => Type::int(),
+                'description' => 'Get records after a specified indedx',
+                'defaultValue' => 0,
+            ],
+            'Since' => [
+                'type' => Type::string(),
+                'description' => 'Get a delta of changes since a timestamp',
+            ]
         ];
     }
 

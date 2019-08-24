@@ -10,7 +10,7 @@ use SilverStripe\GraphQL\TypeCreator;
  * Class PageTypeCreator
  * @package StevieMayhew\Gatsby\GraphQL\Types
  */
-class PageTypeCreator extends TypeCreator
+class PageTypeCreator extends DataObjectTypeCreateor
 {
     /**
      * @return array
@@ -19,6 +19,7 @@ class PageTypeCreator extends TypeCreator
     {
         return [
             'name' => 'SilverStripePage',
+            'description' => 'A record that has an entry in the CMS site tree',
         ];
     }
 
@@ -29,21 +30,21 @@ class PageTypeCreator extends TypeCreator
     {
         $string = Type::string();
         $int = Type::int();
+        $id = Type::id();
         $boolean = Type::boolean();
+        $fields = parent::fields();
 
-        return [
-            'ID' => ['type' => $int],
-            'ParentID' => ['type' => $int],
-            'ErrorCode' => ['type' => $int],
-            'ClassName' => ['type' => $string],
-            'MenuTitle' => ['type' => $string],
-            'Title' => ['type' => $string],
-            'Content' => ['type' => $string],
-            "MetaDescription" => ['type' => $string],
-            "ShowInMenus" => ['type' => $boolean],
-            "ShowInSearch" => ['type' => $boolean],
-            "Sort" => ['type' => $int],
-            "URLSegment" => ['type' => $string],
-        ];
+        return array_merge($fields, [
+            'parentID' => ['type' => $id],
+            'errorCode' => ['type' => $int],
+            'menuTitle' => ['type' => $string],
+            'title' => ['type' => $string],
+            'content' => ['type' => $string],
+            "metaDescription" => ['type' => $string],
+            "showInMenus" => ['type' => $boolean],
+            "showInSearch" => ['type' => $boolean],
+            "sort" => ['type' => $int],
+            "urlSegment" => ['type' => $string],
+        ]);
     }
 }
