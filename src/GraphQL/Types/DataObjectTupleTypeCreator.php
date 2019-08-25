@@ -27,6 +27,7 @@ class DataObjectTupleTypeCreator extends TypeCreator
                 'type' => Injector::inst()->get(ClassNameTypeCreator::class)->toType(),
             ],
             'id' => ['type' => Type::id()],
+            'uuid' => ['type' => Type::id()],
         ];
     }
 

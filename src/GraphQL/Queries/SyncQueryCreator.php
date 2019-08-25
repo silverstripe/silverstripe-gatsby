@@ -55,16 +55,16 @@ class SyncQueryCreator extends QueryCreator implements OperationResolver
     public function args()
     {
         return [
-            'Limit' => [
+            'limit' => [
                 'type' => Type::nonNull(Type::int()),
                 'description' => 'Limit the number of records returned',
                 'defaultValue' => 1000,
             ],
-            'OffsetToken' => [
+            'offsetToken' => [
                 'type' => Type::string(),
                 'description' => 'Get records after a specified indedx',
             ],
-            'Since' => [
+            'since' => [
                 'type' => Type::string(),
                 'description' => 'Get a delta of changes since a timestamp',
             ]
@@ -94,11 +94,11 @@ class SyncQueryCreator extends QueryCreator implements OperationResolver
             return !in_array($class, static::config()->excluded_dataobjects);
         });
         sort($classesToFetch);
-        $budget = (int) $args['Limit'];
+        $budget = (int) $args['limit'];
         if ($budget > static::config()->max_limit) {
             self::invariant(self::ERROR_MAX_LIMIT, [$budget]);
         }
-        $offsetToken = $args['OffsetToken'] ?? null;
+        $offsetToken = $args['offsetToken'] ?? null;
         $offsetObjectID = null;
         $offsetObjectClass = null;
         if ($offsetToken) {
@@ -155,9 +155,11 @@ class SyncQueryCreator extends QueryCreator implements OperationResolver
     private static function parseOffsetToken(string $token): array
     {
         $parts = explode('-', $token);
-        if (sizeof($parts !== 2)) {
+        if (sizeof($parts) !== 2) {
             self::invariant(self::ERROR_INVALID_TOKEN, [$token]);
         }
+
+        return $parts;
     }
 
     /**

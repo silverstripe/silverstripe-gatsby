@@ -27,6 +27,7 @@ class DataObjectTypeCreator extends TypeCreator
     public function fields()
     {
         $fields['id'] = ['type' => Type::id()];
+        $fields['uuid'] = ['type' => Type::id()];
         $fields['created'] = ['type' => Type::string()];
         $fields['lastEdited'] = ['type' => Type::string()];
         $fields['className'] = ['type' => Injector::inst()->get(ClassNameTypeCreator::class)->toType()];
@@ -126,6 +127,20 @@ class DataObjectTypeCreator extends TypeCreator
         return $result;
     }
 
+    public function resolveUUIDField($object, $args = [], $context, ResolveInfo $info): string
+    {
+        return static::createUUID($object);
+    }
+
+    public function resolveLinkField($object, $args = [], $context, ResolveInfo $info): ?string
+    {
+        if ($object->hasMethod('Link')) {
+            return $object->Link();
+        }
+
+        return null;
+    }
+
     /**
      * @param $object
      * @param array $args
@@ -149,6 +164,16 @@ class DataObjectTypeCreator extends TypeCreator
         return [
             'className' => ClassNameTypeCreator::sanitiseClassName($object->ClassName),
             'id' => $object->ID,
+            'uuid' => static::createUUID($object),
         ];
+    }
+
+    /**
+     * @param DataObject $object
+     * @return string
+     */
+    private function createUUID(DataObject $object): string
+    {
+        return md5($object->ClassName .  $object->ID);
     }
 }

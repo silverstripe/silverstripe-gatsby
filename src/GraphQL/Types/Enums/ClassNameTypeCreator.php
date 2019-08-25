@@ -57,7 +57,7 @@ class ClassNameTypeCreator extends TypeCreator
      * @param string $class
      * @return string
      */
-    public function unsanitiseClassName(string $class): string
+    public static function unsanitiseClassName(string $class): string
     {
         return str_replace('__', '\\', $class);
     }
