@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverStripe\GraphQL\Pagination;
+namespace StevieMayhew\Gatsby\GraphQL\Types\Enums;
 
 use GraphQL\Type\Definition\EnumType;
 use SilverStripe\Core\ClassInfo;

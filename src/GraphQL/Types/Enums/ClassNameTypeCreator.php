@@ -1,6 +1,6 @@
 <?php
 
-namespace SilverStripe\GraphQL\Pagination;
+namespace StevieMayhew\Gatsby\GraphQL\Types\Enums;
 
 use GraphQL\Type\Definition\EnumType;
 use SilverStripe\Core\ClassInfo;
@@ -35,10 +35,30 @@ class ClassNameTypeCreator extends TypeCreator
 
     public function attributes()
     {
+        $classes = ClassInfo::subclassesFor(DataObject::class, false);
+        $classes = array_map([static::class, 'sanitiseClassName'], $classes);
         return [
             'name' => 'ClassName',
             'description' => 'The PHP ClassName of the object',
-            'values' => ArrayLib::valuekey(ClassInfo::subclassesFor(DataObject::class, false)),
+            'values' => ArrayLib::valuekey($classes),
         ];
+    }
+
+    /**
+     * @param string $class
+     * @return string
+     */
+    public static function sanitiseClassName(string $class): string
+    {
+        return str_replace('\\', '__', $class);
+    }
+
+    /**
+     * @param string $class
+     * @return string
+     */
+    public function unsanitiseClassName(string $class): string
+    {
+        return str_replace('__', '\\', $class);
     }
 }

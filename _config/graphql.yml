@@ -25,6 +25,7 @@ SilverStripe\GraphQL\Manager:
       queries:
         sync: 'StevieMayhew\Gatsby\GraphQL\Queries\SyncQueryCreator'
       types:
-        SilverStripePage: 'StevieMayhew\Gatsby\GraphQL\Types\PageTypeCreator'
-        DataObjectInterface: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTypeCreator'
+        DataObject: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTypeCreator'
         DataObjectTuple: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTupleTypeCreator'
+        DataObjectRelation: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectRelationTypeCreator'
+        SyncResult: 'StevieMayhew\Gatsby\GraphQL\Types\SyncResultTypeCreator'

@@ -6,14 +6,15 @@ namespace StevieMayhew\Gatsby\GraphQL\Types;
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\GraphQL\Pagination\ClassNameTypeCreator;
-use SilverStripe\GraphQL\Pagination\RelationTypeTypeCreator;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\GraphQL\Util\CaseInsensitiveFieldAccessor;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
+use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
+use StevieMayhew\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
 
-class DataObjectTypeCreateor extends TypeCreator
+class DataObjectTypeCreator extends TypeCreator
 {
     public function attributes()
     {
@@ -28,21 +29,47 @@ class DataObjectTypeCreateor extends TypeCreator
         $fields['id'] = ['type' => Type::id()];
         $fields['created'] = ['type' => Type::string()];
         $fields['lastEdited'] = ['type' => Type::string()];
-        $fields['className'] = ['type' => (new ClassNameTypeCreator())->toType()];
+        $fields['className'] = ['type' => Injector::inst()->get(ClassNameTypeCreator::class)->toType()];
         $fields['ancestry'] = ['type' => Type::listOf(Type::string())];
         $fields['link'] = ['type' => Type::string()];
         $fields['contentFields'] = ['type' => Type::string()];
-        $fields['relations'] = ['type' => Type::listOf($this->manager->getType('DatabjectRelation'))];
+        $fields['relations'] = ['type' => Type::listOf($this->manager->getType('DataObjectRelation'))];
 
         return $fields;
     }
 
-    public function resolveAncestryField($object, $args = [], $context = [], ResolveInfo $info)
+    /**
+     * @param $object
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return array
+     */
+    public function resolveAncestryField($object, $args = [], $context, ResolveInfo $info)
     {
         return ClassInfo::ancestry(get_class($object));
     }
 
-    public function resolveContentFieldsField($object, $args = [], $context = [], ResolveInfo $info)
+    /**
+     * @param $object
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return string
+     */
+    public function resolveClassNameField($object, $args = [], $context, ResolveInfo $info): string
+    {
+        return ClassNameTypeCreator::sanitiseClassName($object->ClassName);
+    }
+
+    /**
+     * @param $object
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return string
+     */
+    public function resolveContentFieldsField($object, $args = [], $context, ResolveInfo $info): string
     {
         $map = $object->toMap();
         $json = [];
@@ -53,7 +80,14 @@ class DataObjectTypeCreateor extends TypeCreator
         return json_encode($json);
     }
 
-    public function resolveRelationsField($object, $args = [], $context = [], ResolveInfo $info)
+    /**
+     * @param $object
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return array
+     */
+    public function resolveRelationsField($object, $args = [], $context, ResolveInfo $info): array
     {
         $result = [];
         $spec = [
@@ -66,10 +100,7 @@ class DataObjectTypeCreateor extends TypeCreator
                     'type' => $identifier,
                     'name' => $name,
                     'records' => $object->$name()->exists() ? [
-                        [
-                            'className' => $object->$name()->ClassName,
-                            'id' => $object->$name()->ID,
-                        ]
+                        $this->createRecord($object->$name()),
                     ] : [],
                 ];
             }
@@ -84,12 +115,10 @@ class DataObjectTypeCreateor extends TypeCreator
                 $result[] = [
                     'type' => $identifier,
                     'name' => $name,
-                    'records' => array_map(function ($item) {
-                        return [
-                            'className' => $item->ClassName,
-                            'id' => $item->ID
-                        ];
-                    }, $object->$name()->toArray()),
+                    'records' => array_map(
+                        [$this, 'createRecord'],
+                        $object->$name()->toArray()
+                    ),
                 ];
             }
         }
@@ -97,10 +126,29 @@ class DataObjectTypeCreateor extends TypeCreator
         return $result;
     }
 
-    public function resolveField($object, $args = [], $context = [], ResolveInfo $info)
+    /**
+     * @param $object
+     * @param array $args
+     * @param $context
+     * @param ResolveInfo $info
+     * @return mixed
+     */
+    public function resolveField($object, $args = [], $context, ResolveInfo $info)
     {
         $fieldName = $info->fieldName;
 
         return (new CaseInsensitiveFieldAccessor())->getValue($object, $fieldName);
+    }
+
+    /**
+     * @param DataObject $object
+     * @return array
+     */
+    private function createRecord(DataObject $object): array
+    {
+        return [
+            'className' => ClassNameTypeCreator::sanitiseClassName($object->ClassName),
+            'id' => $object->ID,
+        ];
     }
 }
