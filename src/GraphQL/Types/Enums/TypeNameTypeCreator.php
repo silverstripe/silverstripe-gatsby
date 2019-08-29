@@ -1,6 +1,6 @@
 <?php
 
-namespace StevieMayhew\Gatsby\GraphQL\Types\Enums;
+namespace SilverStripe\Gatsby\GraphQL\Types\Enums;
 
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;

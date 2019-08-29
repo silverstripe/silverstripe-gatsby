@@ -1,7 +1,7 @@
 <?php
 
 
-namespace StevieMayhew\Gatsby\GraphQL\Types;
+namespace SilverStripe\Gatsby\GraphQL\Types;
 
 
 use GraphQL\Type\Definition\Type;

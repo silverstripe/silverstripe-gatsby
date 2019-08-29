@@ -1,6 +1,6 @@
 <?php
 
-namespace StevieMayhew\Gatsby\GraphQL\Queries;
+namespace SilverStripe\Gatsby\GraphQL\Queries;
 
 use SilverStripe\CMS\Model\SiteTree;
 use Exception;
@@ -13,10 +13,10 @@ use SilverStripe\GraphQL\QueryCreator;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ValidationException;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
 /**
  * Class SyncQueryCreator
- * @package StevieMayhew\Gatsby\GraphQL\Queries
+ * @package SilverStripe\Gatsby\GraphQL\Queries
  */
 class SyncQueryCreator extends QueryCreator implements OperationResolver
 {

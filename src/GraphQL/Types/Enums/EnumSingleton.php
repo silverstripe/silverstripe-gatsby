@@ -1,7 +1,7 @@
 <?php
 
 
-namespace StevieMayhew\Gatsby\GraphQL\Types\Enums;
+namespace SilverStripe\Gatsby\GraphQL\Types\Enums;
 
 
 use GraphQL\Type\Definition\EnumType;

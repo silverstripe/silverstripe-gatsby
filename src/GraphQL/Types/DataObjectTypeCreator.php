@@ -1,7 +1,7 @@
 <?php
 
 
-namespace StevieMayhew\Gatsby\GraphQL\Types;
+namespace SilverStripe\Gatsby\GraphQL\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use GraphQL\Type\Definition\Type;
@@ -18,9 +18,9 @@ use SilverStripe\GraphQL\Util\CaseInsensitiveFieldAccessor;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\Hierarchy\Hierarchy;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\LinkingModeTypeCreator;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\LinkingModeTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
 
 class DataObjectTypeCreator extends TypeCreator
 {

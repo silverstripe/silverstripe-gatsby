@@ -1,14 +1,14 @@
 <?php
 
 
-namespace StevieMayhew\Gatsby\GraphQL\Types;
+namespace SilverStripe\Gatsby\GraphQL\Types;
 
 
 use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\GraphQL\Util\CaseInsensitiveFieldAccessor;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
 
 class DataObjectTupleTypeCreator extends TypeCreator
 {

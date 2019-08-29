@@ -23,15 +23,15 @@ SilverStripe\GraphQL\Manager:
   schemas:
     gatsby:
       queries:
-        sync: 'StevieMayhew\Gatsby\GraphQL\Queries\SyncQueryCreator'
+        sync: 'SilverStripe\Gatsby\GraphQL\Queries\SyncQueryCreator'
       types:
-        DataObject: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTypeCreator'
-        DataObjectTuple: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTupleTypeCreator'
-        DataObjectRelation: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectRelationTypeCreator'
-        SyncResult: 'StevieMayhew\Gatsby\GraphQL\Types\SyncResultTypeCreator'
-        SyncSummary: 'StevieMayhew\Gatsby\GraphQL\Types\SyncSummaryTypeCreator'
-        SyncResultPage: 'StevieMayhew\Gatsby\GraphQL\Types\SyncResultPageTypeCreator'
-StevieMayhew\Gatsby\GraphQL\Types\SyncResultTypeCreator:
+        DataObject: 'SilverStripe\Gatsby\GraphQL\Types\DataObjectTypeCreator'
+        DataObjectTuple: 'SilverStripe\Gatsby\GraphQL\Types\DataObjectTupleTypeCreator'
+        DataObjectRelation: 'SilverStripe\Gatsby\GraphQL\Types\DataObjectRelationTypeCreator'
+        SyncResult: 'SilverStripe\Gatsby\GraphQL\Types\SyncResultTypeCreator'
+        SyncSummary: 'SilverStripe\Gatsby\GraphQL\Types\SyncSummaryTypeCreator'
+        SyncResultPage: 'SilverStripe\Gatsby\GraphQL\Types\SyncResultPageTypeCreator'
+SilverStripe\Gatsby\GraphQL\Types\SyncResultTypeCreator:
   excluded_dataobjects:
     security: 'SilverStripe\Security\*'
     versioned: 'SilverStripe\Versioned\*'

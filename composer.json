@@ -1,5 +1,5 @@
 {
-    "name": "stevie-mayhew/silverstripe-gatsby",
+    "name": "silverstripe/silverstripe-gatsby",
     "description": "SilverStripe Gatsby base",
     "type": "silverstripe-vendormodule",
     "license": "MIT",
@@ -21,7 +21,7 @@
     },
     "autoload": {
         "psr-4": {
-            "StevieMayhew\\Gatsby\\": "src/"
+            "SilverStripe\\Gatsby\\": "src/"
         }
     },
     "minimum-stability": "dev",

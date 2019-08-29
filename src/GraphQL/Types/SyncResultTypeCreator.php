@@ -1,7 +1,7 @@
 <?php
 
 
-namespace StevieMayhew\Gatsby\GraphQL\Types;
+namespace SilverStripe\Gatsby\GraphQL\Types;
 
 use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\ClassInfo;
@@ -9,7 +9,7 @@ use SilverStripe\Core\Config\Configurable;
 use GraphQL\Type\Definition\Type;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\ORM\DataObject;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
 
 class SyncResultTypeCreator extends TypeCreator
 {

@@ -1,15 +1,15 @@
 <?php
 
 
-namespace StevieMayhew\Gatsby\GraphQL\Types;
+namespace SilverStripe\Gatsby\GraphQL\Types;
 
 
 use GraphQL\Type\Definition\Type;
 use SilverStripe\Core\Injector\Injector;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
 use SilverStripe\GraphQL\TypeCreator;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
-use StevieMayhew\Gatsby\GraphQL\Types\Enums\TypeNameTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\TypeNameTypeCreator;
 
 class DataObjectRelationTypeCreator extends TypeCreator
 {
