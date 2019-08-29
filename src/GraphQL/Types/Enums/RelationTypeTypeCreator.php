@@ -2,7 +2,6 @@
 
 namespace StevieMayhew\Gatsby\GraphQL\Types\Enums;
 
-use GraphQL\Type\Definition\EnumType;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\ORM\ArrayLib;
@@ -13,7 +12,7 @@ use SilverStripe\ORM\DataObject;
  *
  * @see SortInputTypeCreator
  */
-class RelationTypeTypeCreator extends TypeCreator
+class RelationTypeTypeCreator extends EnumSingleton
 {
     const HAS_ONE = 'HAS_ONE';
 
@@ -24,24 +23,6 @@ class RelationTypeTypeCreator extends TypeCreator
     const BELONGS_MANY_MANY = 'BELONGS_MANY_MANY';
 
     const BELONGS_TO = 'BELONGS_TO';
-
-    /**
-     * @var EnumType
-     */
-    private $type;
-
-    public function toType()
-    {
-        if (!$this->type) {
-            $this->type = new EnumType($this->toArray());
-        }
-        return $this->type;
-    }
-
-    public function getAttributes()
-    {
-        return $this->attributes();
-    }
 
     public function attributes()
     {

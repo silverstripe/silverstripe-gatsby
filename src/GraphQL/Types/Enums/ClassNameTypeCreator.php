@@ -2,7 +2,6 @@
 
 namespace StevieMayhew\Gatsby\GraphQL\Types\Enums;
 
-use GraphQL\Type\Definition\EnumType;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\ORM\ArrayLib;
@@ -13,26 +12,8 @@ use SilverStripe\ORM\DataObject;
  *
  * @see SortInputTypeCreator
  */
-class ClassNameTypeCreator extends TypeCreator
+class ClassNameTypeCreator extends EnumSingleton
 {
-    /**
-     * @var EnumType
-     */
-    private $type;
-
-    public function toType()
-    {
-        if (!$this->type) {
-            $this->type = new EnumType($this->toArray());
-        }
-        return $this->type;
-    }
-
-    public function getAttributes()
-    {
-        return $this->attributes();
-    }
-
     public function attributes()
     {
         $classes = ClassInfo::subclassesFor(DataObject::class, false);

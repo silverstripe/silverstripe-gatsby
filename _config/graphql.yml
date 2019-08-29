@@ -29,12 +29,12 @@ SilverStripe\GraphQL\Manager:
         DataObjectTuple: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectTupleTypeCreator'
         DataObjectRelation: 'StevieMayhew\Gatsby\GraphQL\Types\DataObjectRelationTypeCreator'
         SyncResult: 'StevieMayhew\Gatsby\GraphQL\Types\SyncResultTypeCreator'
-StevieMayhew\Gatsby\GraphQL\Queries\SyncQueryCreator:
+        SyncSummary: 'StevieMayhew\Gatsby\GraphQL\Types\SyncSummaryTypeCreator'
+        SyncResultPage: 'StevieMayhew\Gatsby\GraphQL\Types\SyncResultPageTypeCreator'
+StevieMayhew\Gatsby\GraphQL\Types\SyncResultTypeCreator:
   excluded_dataobjects:
-    changeSet: 'SilverStripe\Versioned\ChangeSet'
-    changeSetItem: 'SilverStripe\Versioned\ChangeSetItem'
-    fileLink: 'SilverStripe\Assets\Shortcodes\FileLink'
+    security: 'SilverStripe\Security\*'
+    versioned: 'SilverStripe\Versioned\*'
+    shortcodes: 'SilverStripe\Assets\Shortcodes\*'
     siteTreeLink: 'SilverStripe\CMS\Model\SiteTreeLink'
-    loginAttempt: 'SilverStripe\Security\LoginAttempt'
-    memberPassword: 'SilverStripe\Security\MemberPassword'
-    loginHash: 'SilverStripe\Security\RememberLoginHash'
+

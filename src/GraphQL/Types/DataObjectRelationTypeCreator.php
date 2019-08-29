@@ -9,6 +9,7 @@ use SilverStripe\Core\Injector\Injector;
 use StevieMayhew\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
 use SilverStripe\GraphQL\TypeCreator;
 use StevieMayhew\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
+use StevieMayhew\Gatsby\GraphQL\Types\Enums\TypeNameTypeCreator;
 
 class DataObjectRelationTypeCreator extends TypeCreator
 {
@@ -25,6 +26,7 @@ class DataObjectRelationTypeCreator extends TypeCreator
         return [
             'type' => ['type' => Injector::inst()->get(RelationTypeTypeCreator::class)->toType()],
             'name' => ['type' => Type::string()],
+            'ownerType' => ['type' => Injector::inst()->get(TypeNameTypeCreator::class)->toType()],
             'records' => ['type' => Type::listOf($this->manager->getType('DataObjectTuple'))],
         ];
     }
