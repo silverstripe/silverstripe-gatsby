@@ -62,15 +62,5 @@ class SyncQueryCreator extends QueryCreator implements OperationResolver
     public function resolve($object, array $args, $context, ResolveInfo $info)
     {
         return [];
-        return [
-            'summary' => [
-                'total' => 0,
-                'includedClasses' => [],
-            ],
-            'results' => [
-                'offsetToken' => null,
-                'nodes' => [],
-            ]
-        ];
     }
 }

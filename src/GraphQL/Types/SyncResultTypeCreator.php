@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Configurable;
 use GraphQL\Type\Definition\Type;
+use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
@@ -77,10 +78,20 @@ class SyncResultTypeCreator extends TypeCreator
      */
     public function resolveSummaryField($object, array $args = [], $context, ResolveInfo $info): array
     {
-        $classesToFetch = $this->getAllowedClasses();
+        $classesToFetch = array_filter($this->getIncludedClasses($context), function ($class) {
+            return $class::get()->exists();
+        });
         $summary = [
             'total' => 0,
-            'includedClasses' => array_map([ClassNameTypeCreator::class, 'sanitiseClassName'], $classesToFetch),
+            'includedClasses' => array_map(function ($class) {
+                $fields = DataObjectTypeCreator::singleton()->getFieldsForRecord($class::singleton());
+                $shortName = StaticSchema::inst()->typeNameForDataObject($class);
+                return [
+                    'className' => ClassNameTypeCreator::sanitiseClassName($class),
+                    'shortName' => $shortName,
+                    'fields' => array_keys($fields[$shortName] ?? []),
+                ];
+            }, $classesToFetch),
         ];
         foreach ($classesToFetch as $class) {
             $summary['total'] += $class::get()->count();
@@ -99,7 +110,7 @@ class SyncResultTypeCreator extends TypeCreator
      */
     public function resolveResultsField($object, array $args, $context, ResolveInfo $info): array
     {
-        $classesToFetch = $this->getAllowedClasses();
+        $classesToFetch = $this->getIncludedClasses($context);
         $budget = (int) $args['limit'];
         if ($budget > static::config()->max_limit) {
             self::invariant(self::ERROR_MAX_LIMIT, [$budget]);
@@ -196,13 +207,19 @@ class SyncResultTypeCreator extends TypeCreator
         throw new ValidationException(sprintf($msg, ...$context));
     }
 
-    private function getAllowedClasses(): array
+    private function getIncludedClasses(array $context): array
     {
         $blacklist = static::config()->excluded_dataobjects;
         $whitelist = static::config()->included_dataobjects;
 
         $classesToFetch = ClassInfo::subclassesFor(DataObject::class, false);
-        $classesToFetch = array_filter($classesToFetch, function ($class) use ($blacklist, $whitelist) {
+        $classesToFetch = array_filter($classesToFetch, function ($class) use ($blacklist, $whitelist, $context) {
+            if (!$class::get()->exists()) {
+                return false;
+            }
+            if (!$class::singleton()->canView($context['currentUser'])) {
+                return false;
+            }
             $included = empty($whitelist);
             foreach ($whitelist as $pattern) {
                   if (fnmatch($pattern, $class, FNM_NOESCAPE)) {

@@ -17,6 +17,7 @@ use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\GraphQL\Util\CaseInsensitiveFieldAccessor;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DataObjectSchema;
+use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\Hierarchy\Hierarchy;
 use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
 use SilverStripe\Gatsby\GraphQL\Types\Enums\LinkingModeTypeCreator;
@@ -40,7 +41,6 @@ class DataObjectTypeCreator extends TypeCreator
         $fields['created'] = ['type' => Type::string()];
         $fields['lastEdited'] = ['type' => Type::string()];
         $fields['className'] = ['type' => Injector::inst()->get(ClassNameTypeCreator::class)->toType()];
-        $fields['shortName'] = ['type' => Type::string()];
         $fields['ancestry'] = ['type' => Type::listOf(Type::string())];
         $fields['link'] = ['type' => Type::string()];
         $fields['contentFields'] = ['type' => Type::string()];
@@ -82,18 +82,7 @@ class DataObjectTypeCreator extends TypeCreator
      */
     public function resolveContentFieldsField($object, $args = [], $context, ResolveInfo $info): string
     {
-        $schema = DataObject::getSchema();
-        $fields = $schema->databaseFields(get_class($object));
-        $json = [];
-        foreach ($fields as $fieldName => $spec) {
-            $class = $schema->classForField(get_class($object), $fieldName);
-            $shortName = StaticSchema::inst()->typeNameForDataObject($class);
-            if (!isset($json[$shortName])) {
-                $json[$shortName] = [];
-            }
-
-            $json[$shortName][lcfirst($fieldName)] = $object->$fieldName;
-        }
+        $json = $this->getFieldsForRecord($object);
 
         return json_encode($json);
     }
@@ -183,18 +172,16 @@ class DataObjectTypeCreator extends TypeCreator
     {
         if($object->hasMethod('Parent')) {
             $parent = $object->Parent();
-            return $parent->exists() ? static::createUUID($parent) : null;
+            return $parent->exists() ? static::createUUID($parent) : "__TOP__";
         }
 
         return null;
     }
 
-    public function resolveShortNameField($object, $args = [], $context, ResolveInfo $info): string
-    {
-        return ClassInfo::shortName($object->ClassName);
-    }
-
     /**
+     * Gatsby rejects fields that are null on every record, because it can't infer a type.
+     * This function coerces null into its proper empty value to help Gatsby type it.
+     *
      * @param $object
      * @param array $args
      * @param $context
@@ -204,8 +191,66 @@ class DataObjectTypeCreator extends TypeCreator
     public function resolveField($object, $args = [], $context, ResolveInfo $info)
     {
         $fieldName = $info->fieldName;
+        $accessor = new CaseInsensitiveFieldAccessor();
+        $val = $accessor->getValue($object, $fieldName);
+        if ($val === null) {
+            $objectFieldName = $accessor->getObjectFieldName($object, $fieldName);
+            /* @var DBField $obj */
+            $obj = $object->obj($objectFieldName);
+            if ($obj) {
+                $val = $obj->nullValue();
+            }
 
-        return (new CaseInsensitiveFieldAccessor())->getValue($object, $fieldName);
+            return null;
+        }
+
+        return $val;
+    }
+
+    public function getFieldsForRecord(DataObject $object): array
+    {
+        $schema = DataObject::getSchema();
+        $fields = $schema->databaseFields(get_class($object));
+        $json = [];
+        $omitted = ['id', 'created', 'lastEdited', 'className'];
+        foreach ($fields as $field => $spec) {
+            $fieldName = static::fieldName($field);
+            if (in_array($fieldName, $omitted)) {
+                continue;
+            }
+            $class = $schema->classForField(get_class($object), $field);
+            $shortName = StaticSchema::inst()->typeNameForDataObject($class);
+            if (!isset($json[$shortName])) {
+                $json[$shortName] = [];
+            }
+            $val = $object->$field;
+            if ($val === null) {
+                $obj = $object->obj($field);
+                if ($obj) {
+                    $val = $obj->nullValue();
+                }
+                // Force fallback to string
+                if ($val === null) {
+                    $val = (string) $val;
+                }
+            }
+            $json[$shortName][$fieldName] = $val;
+        }
+
+        return $json;
+    }
+
+    public static function fieldName(string $field): string
+    {
+        return preg_replace_callback('/^([A-Z]+)/', function ($matches) use ($field) {
+            $part = strtolower($matches[1]);
+            $len = strlen($matches[1]);
+            if (strlen($len > 1 && $len < strlen($field))) {
+                $last = strlen($part) - 1;
+                $part[$last] = strtoupper($part[$last]);
+            }
+            return $part;
+        }, $field);
     }
 
     /**

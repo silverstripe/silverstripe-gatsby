@@ -23,7 +23,8 @@ class SyncSummaryTypeCreator extends TypeCreator
     {
         return [
             'total' => ['type' => Type::int()],
-            'includedClasses' => ['type' => Type::listOf(Injector::inst()->get(ClassNameTypeCreator::class)->toType())],
+            'includedClasses' => ['type' => Type::listOf($this->manager->getType('ClassSummary'))],
         ];
     }
+
 }

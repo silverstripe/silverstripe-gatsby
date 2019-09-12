@@ -31,6 +31,7 @@ SilverStripe\GraphQL\Manager:
         SyncResult: 'SilverStripe\Gatsby\GraphQL\Types\SyncResultTypeCreator'
         SyncSummary: 'SilverStripe\Gatsby\GraphQL\Types\SyncSummaryTypeCreator'
         SyncResultPage: 'SilverStripe\Gatsby\GraphQL\Types\SyncResultPageTypeCreator'
+        ClassSummary: 'SilverStripe\Gatsby\GraphQL\Types\ClassSummaryTypeCreator'
 SilverStripe\Gatsby\GraphQL\Types\SyncResultTypeCreator:
   excluded_dataobjects:
     security: 'SilverStripe\Security\*'
