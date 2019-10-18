@@ -17,7 +17,8 @@
         }
     ],
     "require": {
-        "silverstripe/cms": "^4.0"
+        "silverstripe/cms": "^4.4",
+        "unclecheese/silverstripe-graphql-forms": "*"
     },
     "autoload": {
         "psr-4": {

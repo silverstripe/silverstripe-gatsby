@@ -38,6 +38,12 @@ class SyncResultTypeCreator extends TypeCreator
      */
     private static $included_dataobjects = [];
 
+    /**
+     * @config
+     * @var bool
+     */
+    private static $filter_can_view = true;
+
 
     public function attributes()
     {
@@ -138,7 +144,7 @@ class SyncResultTypeCreator extends TypeCreator
                 $list = $list->filter('ID:GreaterThan', $offsetObjectID);
             }
             foreach ($list as $record) {
-                if (!$record->canView($context['currentUser'] ?? null)) {
+                if (static::config()->filter_can_view && !$record->canView($context['currentUser'] ?? null)) {
                     continue;
                 }
                 $results[] = $record;
@@ -217,7 +223,7 @@ class SyncResultTypeCreator extends TypeCreator
             if (!$class::get()->exists()) {
                 return false;
             }
-            if (!$class::singleton()->canView($context['currentUser'])) {
+            if (static::config()->filter_can_view && !$class::singleton()->canView($context['currentUser'])) {
                 return false;
             }
             $included = empty($whitelist);
