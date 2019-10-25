@@ -1,6 +1,9 @@
 ---
 Name: silverstripe-gatsby
 ---
+SilverStripe\ORM\DataObject:
+  extensions:
+    - SilverStripe\Gatsby\Extensions\GatsbyDataObject
 SilverStripe\Control\Director:
   rules:
     '__gatsby/graphql': '%$SilverStripe\GraphQL\Controller.gatsby'

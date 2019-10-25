@@ -7,6 +7,7 @@ use GraphQL\Type\Definition\ResolveInfo;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Configurable;
 use GraphQL\Type\Definition\Type;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\SyncStatusTypeCreator;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\ORM\DataObject;
@@ -42,7 +43,7 @@ class SyncResultTypeCreator extends TypeCreator
      * @config
      * @var bool
      */
-    private static $filter_can_view = true;
+    private static $filter_can_view = false;
 
 
     public function attributes()
@@ -68,6 +69,10 @@ class SyncResultTypeCreator extends TypeCreator
                     'offsetToken' => [
                         'type' => Type::string(),
                         'description' => 'Get records after a specified indedx',
+                    ],
+                    'since' => [
+                        'type' => Type::int(),
+                        'description' => 'Unix timestamp representing the last sync time'
                     ],
                 ]
             ]
@@ -116,6 +121,8 @@ class SyncResultTypeCreator extends TypeCreator
      */
     public function resolveResultsField($object, array $args, $context, ResolveInfo $info): array
     {
+        $since = $args['since'] ?? 0;
+        $sinceDate = date('Y-m-d H:i:s', $since);
         $classesToFetch = $this->getIncludedClasses($context);
         $budget = (int) $args['limit'];
         if ($budget > static::config()->max_limit) {
@@ -137,9 +144,9 @@ class SyncResultTypeCreator extends TypeCreator
         $results = [];
         $token = null;
 
-        // Todo: use "Since" token for preview/syncing
         foreach ($classesToFetch as $classIndex => $dataObjectClass) {
-            $list = $dataObjectClass::get()->sort('ID', 'ASC');
+            $list = $dataObjectClass::get()->sort('ID', 'ASC')
+                ->filter('LastEdited:GreaterThan', $sinceDate);
             if ($offsetObjectClass === $dataObjectClass) {
                 $list = $list->filter('ID:GreaterThan', $offsetObjectID);
             }
@@ -147,7 +154,18 @@ class SyncResultTypeCreator extends TypeCreator
                 if (static::config()->filter_can_view && !$record->canView($context['currentUser'] ?? null)) {
                     continue;
                 }
+                $status = null;
+                if (strtotime($record->Created) > $since) {
+                    $status = SyncStatusTypeCreator::STATUS_CREATED;
+                } else if (strtotime($record->LastEdited) > $since) {
+                    $status = SyncStatusTypeCreator::STATUS_UPDATED;
+                } else {
+                    // handle deletes
+                }
+
+                $record->setField('syncStatus', $status);
                 $results[] = $record;
+
                 if (sizeof($results) === $budget) {
                     $token = self::createOffsetToken($dataObjectClass, $record->ID);
                     break(2);

@@ -12,6 +12,7 @@ use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\Gatsby\GraphQL\Types\Enums\SyncStatusTypeCreator;
 use SilverStripe\GraphQL\Scaffolding\StaticSchema;
 use SilverStripe\GraphQL\TypeCreator;
 use SilverStripe\GraphQL\Util\CaseInsensitiveFieldAccessor;
@@ -45,6 +46,7 @@ class DataObjectTypeCreator extends TypeCreator
         $fields['link'] = ['type' => Type::string()];
         $fields['contentFields'] = ['type' => Type::string()];
         $fields['relations'] = ['type' => Type::listOf($this->manager->getType('DataObjectRelation'))];
+        $fields['syncStatus'] = ['type' => Injector::inst()->get(SyncStatusTypeCreator::class)->toType()];
 
         return $fields;
     }
