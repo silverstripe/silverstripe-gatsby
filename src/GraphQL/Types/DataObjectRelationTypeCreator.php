@@ -27,6 +27,7 @@ class DataObjectRelationTypeCreator extends TypeCreator
             'type' => ['type' => Injector::inst()->get(RelationTypeTypeCreator::class)->toType()],
             'name' => ['type' => Type::string()],
             'ownerType' => ['type' => Injector::inst()->get(TypeNameTypeCreator::class)->toType()],
+            'childType' => ['type' => Injector::inst()->get(TypeNameTypeCreator::class)->toType()],
             'records' => ['type' => Type::listOf($this->manager->getType('DataObjectTuple'))],
         ];
     }

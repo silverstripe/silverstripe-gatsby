@@ -14,15 +14,9 @@ use SilverStripe\ORM\DataObject;
  */
 class RelationTypeTypeCreator extends EnumSingleton
 {
-    const HAS_ONE = 'HAS_ONE';
+    const RELATION_SINGULAR = 'SINGULAR';
 
-    const HAS_MANY = 'HAS_MANY';
-
-    const MANY_MANY = 'MANY_MANY';
-
-    const BELONGS_MANY_MANY = 'BELONGS_MANY_MANY';
-
-    const BELONGS_TO = 'BELONGS_TO';
+    const RELATION_PLURAL = 'PLURAL';
 
     public function attributes()
     {
@@ -30,11 +24,8 @@ class RelationTypeTypeCreator extends EnumSingleton
             'name' => 'RelationType',
             'description' => 'The type of relationship of one object to another',
             'values' => [
-                static::HAS_ONE,
-                static::HAS_MANY,
-                static::MANY_MANY,
-                static::BELONGS_MANY_MANY,
-                static::BELONGS_TO,
+                static::RELATION_SINGULAR,
+                static::RELATION_PLURAL,
             ]
         ];
     }

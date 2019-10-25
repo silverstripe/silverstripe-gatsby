@@ -1,0 +1,8 @@
+---
+Name: silverstripe-gatsby-config
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Gatsby\GraphQL\Types\DataObjectTypeCreator:
+    extra_relations:
+      'SilverStripe\CMS\Model\SiteTree':
+        Children: 'SilverStripe\CMS\Model\SiteTree'

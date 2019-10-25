@@ -15,13 +15,26 @@ use SilverStripe\ORM\DataObject;
  */
 class TypeNameTypeCreator extends EnumSingleton
 {
+    /**
+     * Core dataobjects in the SilverStripe vendor space get special treatment because:
+     * a) they're used a lot
+     * b) With Gatsby prefixed type SS, it looks shit (SSSilverStripe)
+     * @param string $class
+     * @return string
+     */
+    public static function typeName(string $class): string
+    {
+        return preg_replace(
+            '/^SilverStripe/',
+            '',
+            StaticSchema::inst()->typeNameForDataObject($class)
+        );
+
+    }
     public function attributes()
     {
         $classes = ClassInfo::subclassesFor(DataObject::class, false);
-        $schema = StaticSchema::inst();
-        $types = array_map(function($class) use ($schema) {
-            return $schema->typeNameForDataObject($class);
-        }, $classes);
+        $types = array_map([static::class, 'typeName'], $classes);
         return [
             'name' => 'TypeName',
             'description' => 'The GraphQL type name of a dataobject',
