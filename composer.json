@@ -18,6 +18,7 @@
     ],
     "require": {
         "silverstripe/cms": "^4.4",
+        "silverstripe/graphql": "4.x-dev",
         "unclecheese/silverstripe-graphql-forms": "*"
     },
     "autoload": {
