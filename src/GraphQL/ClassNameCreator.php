@@ -1,28 +1,28 @@
 <?php
 
-namespace SilverStripe\Gatsby\GraphQL\Types\Enums;
+
+namespace SilverStripe\Gatsby\GraphQL;
+
 
 use SilverStripe\Core\ClassInfo;
-use SilverStripe\GraphQL\TypeCreator;
+use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
+use SilverStripe\GraphQL\Schema\Schema;
+use SilverStripe\GraphQL\Schema\Type\Enum;
 use SilverStripe\ORM\ArrayLib;
 use SilverStripe\ORM\DataObject;
 
-/**
- * Type for specifying the sort direction for a specific field.
- *
- * @see SortInputTypeCreator
- */
-class ClassNameTypeCreator extends EnumSingleton
+class ClassNameCreator implements SchemaUpdater
 {
-    public function attributes()
+    public static function updateSchema(Schema $schema): void
     {
         $classes = ClassInfo::subclassesFor(DataObject::class, false);
         $classes = array_map([static::class, 'sanitiseClassName'], $classes);
-        return [
-            'name' => 'ClassName',
-            'description' => 'The PHP ClassName of the object',
-            'values' => ArrayLib::valuekey($classes),
-        ];
+        $enum = Enum::create(
+            'ClassName',
+            ArrayLib::valuekey($classes),
+            'The PHP ClassName of the object'
+        );
+        $schema->addEnum($enum);
     }
 
     /**
@@ -42,4 +42,5 @@ class ClassNameTypeCreator extends EnumSingleton
     {
         return str_replace('__', '\\', $class);
     }
+
 }

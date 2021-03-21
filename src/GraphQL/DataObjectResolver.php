@@ -1,53 +1,32 @@
 <?php
 
 
-namespace SilverStripe\Gatsby\GraphQL\Types;
+namespace SilverStripe\Gatsby\GraphQL;
+
 
 use GraphQL\Type\Definition\ResolveInfo;
-use GraphQL\Type\Definition\Type;
-use SilverStripe\CMS\Controllers\ModelAsController;
-use SilverStripe\CMS\Controllers\RootURLController;
-use SilverStripe\CMS\Model\SiteTree;
-use SilverStripe\Control\Director;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Config;
-use SilverStripe\Core\Injector\Injector;
-use SilverStripe\GraphQL\Scaffolding\StaticSchema;
-use SilverStripe\GraphQL\TypeCreator;
-use SilverStripe\GraphQL\Util\CaseInsensitiveFieldAccessor;
+use SilverStripe\GraphQL\Schema\DataObject\FieldAccessor;
+use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
+use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DataObjectSchema;
 use SilverStripe\ORM\FieldType\DBField;
 use SilverStripe\ORM\Hierarchy\Hierarchy;
-use SilverStripe\Gatsby\GraphQL\Types\Enums\ClassNameTypeCreator;
-use SilverStripe\Gatsby\GraphQL\Types\Enums\LinkingModeTypeCreator;
-use SilverStripe\Gatsby\GraphQL\Types\Enums\RelationTypeTypeCreator;
+use SilverStripe\Security\Member;
 
-class DataObjectTypeCreator extends TypeCreator
+class DataObjectResolver
 {
-    public function attributes()
-    {
-        return [
-            'name' => 'DataObject',
-            'description' => 'A generic SilverStripe data record',
-        ];
-    }
+    const HAS_ONE = 'HAS_ONE';
 
-    public function fields()
-    {
-        $fields['id'] = ['type' => Type::int()];
-        $fields['parentUUID'] = ['type' => Type::id()];
-        $fields['uuid'] = ['type' => Type::id()];
-        $fields['created'] = ['type' => Type::string()];
-        $fields['lastEdited'] = ['type' => Type::string()];
-        $fields['className'] = ['type' => Injector::inst()->get(ClassNameTypeCreator::class)->toType()];
-        $fields['ancestry'] = ['type' => Type::listOf(Type::string())];
-        $fields['link'] = ['type' => Type::string()];
-        $fields['contentFields'] = ['type' => Type::string()];
-        $fields['relations'] = ['type' => Type::listOf($this->manager->getType('DataObjectRelation'))];
+    const HAS_MANY = 'HAS_MANY';
 
-        return $fields;
-    }
+    const MANY_MANY = 'MANY_MANY';
+
+    const BELONGS_MANY_MANY = 'BELONGS_MANY_MANY';
+
+    const BELONGS_TO = 'BELONGS_TO';
+
 
     /**
      * @param $object
@@ -56,51 +35,43 @@ class DataObjectTypeCreator extends TypeCreator
      * @param ResolveInfo $info
      * @return array
      */
-    public function resolveAncestryField($object, $args = [], $context, ResolveInfo $info)
+    public static function resolveDataObjectAncestry($object, $args = [], $context, ResolveInfo $info)
     {
         return ClassInfo::ancestry(get_class($object));
     }
 
     /**
      * @param $object
-     * @param array $args
-     * @param $context
-     * @param ResolveInfo $info
      * @return string
      */
-    public function resolveClassNameField($object, $args = [], $context, ResolveInfo $info): string
+    public static function resolveDataObjectClassName($object): string
     {
-        return ClassNameTypeCreator::sanitiseClassName($object->ClassName);
+        return ClassNameCreator::sanitiseClassName($object->ClassName);
     }
 
     /**
      * @param $object
-     * @param array $args
-     * @param $context
-     * @param ResolveInfo $info
      * @return string
      */
-    public function resolveContentFieldsField($object, $args = [], $context, ResolveInfo $info): string
+    public static function resolveDataObjectContentFields($object): string
     {
-        $json = $this->getFieldsForRecord($object);
+        $json = static::getFieldsForRecord($object);
 
         return json_encode($json);
     }
 
     /**
      * @param $object
-     * @param array $args
-     * @param $context
-     * @param ResolveInfo $info
      * @return array
+     * @throws SchemaBuilderException
      */
-    public function resolveRelationsField($object, $args = [], $context, ResolveInfo $info): array
+    public static function resolveDataObjectRelations($object): array
     {
-        $typeName = StaticSchema::inst()->typeNameForDataObject($object);
+        $typeName = static::typeName($object->ClassName);
         $result = [];
         $spec = [
-            'hasOne' => RelationTypeTypeCreator::HAS_ONE,
-            'belongsTo' => RelationTypeTypeCreator::BELONGS_TO,
+            'hasOne' => self::HAS_ONE,
+            'belongsTo' => self::BELONGS_TO,
         ];
         foreach ($spec as $method => $identifier) {
             foreach ($object->$method() as $name => $className) {
@@ -109,15 +80,15 @@ class DataObjectTypeCreator extends TypeCreator
                     'name' => $name,
                     'ownerType' => $typeName,
                     'records' => $object->$name()->exists() ? [
-                        $this->createRecord($object->$name()),
+                        static::createRecord($object->$name()),
                     ] : [],
                 ];
             }
         }
 
         $spec = [
-            'hasMany' => RelationTypeTypeCreator::HAS_MANY,
-            'manyMany' => RelationTypeTypeCreator::MANY_MANY,
+            'hasMany' => self::HAS_MANY,
+            'manyMany' => self::MANY_MANY,
         ];
         foreach ($spec as $method => $identifier) {
             foreach ($object->$method() as $name => $className) {
@@ -126,7 +97,7 @@ class DataObjectTypeCreator extends TypeCreator
                     'name' => $name,
                     'ownerType' => $typeName,
                     'records' => array_map(
-                        [$this, 'createRecord'],
+                        [static::class, 'createRecord'],
                         $object->$name()->toArray()
                     ),
                 ];
@@ -141,11 +112,11 @@ class DataObjectTypeCreator extends TypeCreator
                 $class = get_parent_class($class);
             }
             $result[] = [
-                'type' => RelationTypeTypeCreator::HAS_MANY,
+                'type' => self::HAS_MANY,
                 'name' => 'Children',
-                'ownerType' => StaticSchema::inst()->typeNameForDataObject($class),
+                'ownerType' => Schema::create('gatsby')->getTypeNameForClass($class),
                 'records' => array_map(
-                    [$this, 'createRecord'],
+                    [static::class, 'createRecord'],
                     $object->Children()->toArray()
                 ),
             ];
@@ -154,12 +125,12 @@ class DataObjectTypeCreator extends TypeCreator
         return $result;
     }
 
-    public function resolveUUIDField($object, $args = [], $context, ResolveInfo $info): string
+    public static function resolveDataObjectUUID($object): string
     {
         return static::createUUID($object);
     }
 
-    public function resolveLinkField($object, $args = [], $context, ResolveInfo $info): ?string
+    public static function resolveDataObjectLink($object): ?string
     {
         if ($object->hasMethod('Link')) {
             return $object->Link();
@@ -168,7 +139,7 @@ class DataObjectTypeCreator extends TypeCreator
         return null;
     }
 
-    public function resolveParentUUIDField($object, $args = [], $context, ResolveInfo $info): ?string
+    public static function resolveDataObjectParentUUID($object): ?string
     {
         if($object->hasMethod('Parent')) {
             $parent = $object->Parent();
@@ -176,6 +147,18 @@ class DataObjectTypeCreator extends TypeCreator
         }
 
         return null;
+    }
+
+    /**
+     * @param DataObject $object
+     * @return bool
+     */
+    public static function resolveIsPublic(DataObject $object): bool
+    {
+        // If an anonymous user can't view it
+        return Member::actAs(null, function () use ($object) {
+            return $object->canView();
+        });
     }
 
     /**
@@ -188,29 +171,27 @@ class DataObjectTypeCreator extends TypeCreator
      * @param ResolveInfo $info
      * @return mixed
      */
-    public function resolveField($object, $args = [], $context, ResolveInfo $info)
+    public static function resolveDataObject($object, $args = [], $context, ResolveInfo $info)
     {
+        $accessor = FieldAccessor::singleton();
         $fieldName = $info->fieldName;
-        $accessor = new CaseInsensitiveFieldAccessor();
-        $val = $accessor->getValue($object, $fieldName);
+        $val = $accessor->accessField($object, $fieldName);
         if ($val === null) {
-            $objectFieldName = $accessor->getObjectFieldName($object, $fieldName);
+            $objectFieldName = $accessor->normaliseField($object, $fieldName);
             /* @var DBField $obj */
             $obj = $object->obj($objectFieldName);
             if ($obj) {
                 $val = $obj->nullValue();
             }
-
-            return null;
         }
 
         return $val;
     }
 
-    public function getFieldsForRecord(DataObject $object): array
+    public static function getFieldsForRecord(DataObject $object): array
     {
         $schema = DataObject::getSchema();
-        $fields = $schema->databaseFields(get_class($object));
+        $fields = $schema->databaseFields($object->ClassName);
         $json = [];
         $omitted = ['id', 'created', 'lastEdited', 'className'];
         foreach ($fields as $field => $spec) {
@@ -218,8 +199,8 @@ class DataObjectTypeCreator extends TypeCreator
             if (in_array($fieldName, $omitted)) {
                 continue;
             }
-            $class = $schema->classForField(get_class($object), $field);
-            $shortName = StaticSchema::inst()->typeNameForDataObject($class);
+            $class = $schema->classForField($object->ClassName, $field);
+            $shortName = static::typeName($class);
             if (!isset($json[$shortName])) {
                 $json[$shortName] = [];
             }
@@ -257,10 +238,10 @@ class DataObjectTypeCreator extends TypeCreator
      * @param DataObject $object
      * @return array
      */
-    private function createRecord(DataObject $object): array
+    private static function createRecord(DataObject $object): array
     {
         return [
-            'className' => ClassNameTypeCreator::sanitiseClassName($object->ClassName),
+            'className' => ClassNameCreator::sanitiseClassName($object->ClassName),
             'id' => $object->ID,
             'uuid' => static::createUUID($object),
         ];
@@ -270,8 +251,19 @@ class DataObjectTypeCreator extends TypeCreator
      * @param DataObject $object
      * @return string
      */
-    private function createUUID(DataObject $object): string
+    private static function createUUID(DataObject $object): string
     {
-        return md5($object->ClassName .  $object->ID);
+        return md5($object->ClassName . $object->ID);
     }
+
+    /**
+     * @param string $class
+     * @return string|null
+     * @throws SchemaBuilderException
+     */
+    private static function typeName(string $class): ?string
+    {
+        return Schema::create('gatsby')->getTypeNameForClass($class);
+    }
+
 }

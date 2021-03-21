@@ -5,37 +5,13 @@ SilverStripe\Control\Director:
   rules:
     '__gatsby/graphql': '%$SilverStripe\GraphQL\Controller.gatsby'
 SilverStripe\Core\Injector\Injector:
-  SilverStripe\GraphQL\Manager.gatsby:
-    class: SilverStripe\GraphQL\Manager
-    constructor:
-      identifier: gatsby
-    properties:
-      Middlewares:
-        CSRFMiddleware: '%$SilverStripe\GraphQL\Middleware\QueryMiddleware.csrf'
-        HTTPMethodMiddleware: '%$SilverStripe\GraphQL\Middleware\QueryMiddleware.httpMethod'
   SilverStripe\GraphQL\Controller.gatsby:
     class: SilverStripe\GraphQL\Controller
     constructor:
-      manager: '%$SilverStripe\GraphQL\Manager.gatsby'
+      schema: gatsby
 
-
-SilverStripe\GraphQL\Manager:
+SilverStripe\GraphQL\Schema\Schema:
   schemas:
     gatsby:
-      queries:
-        sync: 'SilverStripe\Gatsby\GraphQL\Queries\SyncQueryCreator'
-      types:
-        DataObject: 'SilverStripe\Gatsby\GraphQL\Types\DataObjectTypeCreator'
-        DataObjectTuple: 'SilverStripe\Gatsby\GraphQL\Types\DataObjectTupleTypeCreator'
-        DataObjectRelation: 'SilverStripe\Gatsby\GraphQL\Types\DataObjectRelationTypeCreator'
-        SyncResult: 'SilverStripe\Gatsby\GraphQL\Types\SyncResultTypeCreator'
-        SyncSummary: 'SilverStripe\Gatsby\GraphQL\Types\SyncSummaryTypeCreator'
-        SyncResultPage: 'SilverStripe\Gatsby\GraphQL\Types\SyncResultPageTypeCreator'
-        ClassSummary: 'SilverStripe\Gatsby\GraphQL\Types\ClassSummaryTypeCreator'
-SilverStripe\Gatsby\GraphQL\Types\SyncResultTypeCreator:
-  excluded_dataobjects:
-    security: 'SilverStripe\Security\*'
-    versioned: 'SilverStripe\Versioned\*'
-    shortcodes: 'SilverStripe\Assets\Shortcodes\*'
-    siteTreeLink: 'SilverStripe\CMS\Model\SiteTreeLink'
+      src: 'silverstripe/silverstripe-gatsby: _graphql'
 

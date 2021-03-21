@@ -1,0 +1,6 @@
+---
+Name: silverstripe-gatsby-config
+---
+SilverStripe\ORM\DataObject:
+  extensions:
+    - SilverStripe\Gatsby\Extensions\DataObjectExtension

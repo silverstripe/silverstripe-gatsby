@@ -1,0 +1,27 @@
+sync:
+  type: JSONBlob
+  args:
+    since:
+      type: Int!
+      description: Get a delta of changes since a timestamp
+    includeDraft:
+      type: Boolean
+      defaultValue: false
+      description: 'If true, include draft content (must be authenticated)'
+    limit:
+      type: Int
+      defaultValue: 1000
+      description: The number of results returned per query
+    offset:
+      type: Int
+      defaultValue: 0
+      description: The offset of results to fetch
+schema:
+  type: String
+  args:
+    prefix:
+      type: String
+      description: The prefix for typenames
+
+
+

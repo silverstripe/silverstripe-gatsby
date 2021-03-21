@@ -1,0 +1,13 @@
+SilverStripe\CMS\Model\SiteTree:
+  fields:
+    id: true
+    title: true
+    menuTitle: true
+    sort: true
+    link: String
+    parentID: true
+  operations:
+    read:
+      name: 'getNavigation'
+      plugins:
+        paginateList: true
