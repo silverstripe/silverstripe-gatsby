@@ -5,4 +5,5 @@ SilverStripe\ORM\DataObject:
   extensions:
     - SilverStripe\Gatsby\Extensions\DataObjectExtension
 SilverStripe\Gatsby\Handler\ContentUpdateHandler:
-  url: '`CONTENT_UPDATE_URL`'
+  properties:
+    url: '`CONTENT_UPDATE_URL`'

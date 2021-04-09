@@ -15,16 +15,15 @@ class ContentUpdateHandler implements EventHandlerInterface
 
     /**
      * @var string
-     * @config
      */
-    private static $url;
+    private $url;
 
     /**
      * @param EventContextInterface $context
      */
     public function fire(EventContextInterface $context): void
     {
-        $url = static::config()->get('url');
+        $url = $this->getURL();
         $ch = curl_init();
         curl_setopt($ch, CURLOPT_URL, $url);
         curl_setopt($ch, CURLOPT_POST, 1);
@@ -32,4 +31,24 @@ class ContentUpdateHandler implements EventHandlerInterface
         curl_exec($ch);
         curl_close ($ch);
     }
+
+    /**
+     * @return string
+     */
+    public function getUrl(): string
+    {
+        return $this->url;
+    }
+
+    /**
+     * @param string $url
+     * @return ContentUpdateHandler
+     */
+    public function setUrl(string $url): ContentUpdateHandler
+    {
+        $this->url = $url;
+        return $this;
+    }
+
+
 }
