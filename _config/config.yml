@@ -4,6 +4,7 @@ Name: silverstripe-gatsby-config
 SilverStripe\ORM\DataObject:
   extensions:
     - SilverStripe\Gatsby\Extensions\DataObjectExtension
+    - SilverStripe\Gatsby\Extensions\SiteTreeExtension
 SilverStripe\Core\Injector\Injector:
   SilverStripe\Gatsby\Handler\ContentUpdateHandler:
     properties:
