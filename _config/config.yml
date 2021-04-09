@@ -4,3 +4,5 @@ Name: silverstripe-gatsby-config
 SilverStripe\ORM\DataObject:
   extensions:
     - SilverStripe\Gatsby\Extensions\DataObjectExtension
+SilverStripe\Gatsby\Handler\ContentUpdateHandler:
+  url: '`CONTENT_UPDATE_URL`'

@@ -9,18 +9,13 @@
     ],
     "authors": [
         {
-            "name": "Stevie Mayhew",
-            "homepage": "https://www.stevie.co.nz"
-        },
-        {
             "name": "Uncle Cheese"
         }
     ],
     "require": {
         "silverstripe/cms": "^4.4",
         "silverstripe/graphql": "4.x-dev",
-        "unclecheese/silverstripe-graphql-forms": "*",
-        "silverstripe/versioned-snapshots": "*"
+        "silverstripe/cms-events": "*"
     },
     "autoload": {
         "psr-4": {

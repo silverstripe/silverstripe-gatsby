@@ -12,15 +12,16 @@ use SilverStripe\GraphQL\Schema\Type\InputType;
 use SilverStripe\GraphQL\Schema\Type\ModelInterfaceType;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\ModelUnionType;
+use SilverStripe\GraphQL\Schema\Type\Type;
 
 class SchemaResolver
 {
     /**
      * @param $obj
      * @param $args
-     * @return string
+     * @return array
      */
-    public static function resolveSchema($obj, $args): string
+    public static function resolveSchema($obj, $args): array
     {
         $prefix = $args['prefix'] ?? '';
         $schema = SchemaBuilder::singleton()->boot('gatsby')->createStoreableSchema();
@@ -47,14 +48,12 @@ class SchemaResolver
                 continue;
             }
 
-
             $type->setName($renamed[$type->getName()]);
+
             foreach ($type->getFields() as $field) {
                 $newName = $renamed[$field->getNamedType()] ?? null;
                 if ($newName) {
                     $field->setNamedType($newName);
-                    $typeName = $field->getType();
-                    $field->setType($typeName . ' @link');
                 }
             }
             $newInterfaces = array_filter(array_map(function ($old) use ($renamed) {
@@ -72,6 +71,12 @@ class SchemaResolver
                     $field->setNamedType($newName);
                 }
             }
+            $newInterfaces = array_filter(array_map(function ($old) use ($renamed) {
+                return $renamed[$old] ?? null;
+            }, $interface->getInterfaces()));
+            $interface->setInterfaces($newInterfaces);
+            $interface->addInterface('Node');
+
             $interfaces[] = $interface;
         }
         foreach ($schema->getUnions() as $union) {
@@ -93,6 +98,14 @@ class SchemaResolver
                 'scalars' => $scalars,
             ]
         );
-        return $encoder->encode();
+
+        $typeNames = array_filter(array_map(function ($type) {
+            return $type instanceof InputType ? null : $type->getName();
+        }, array_merge($types, $unions)));
+
+        return [
+            'schema' => $encoder->encode(),
+            'types' => $typeNames,
+        ];
     }
 }

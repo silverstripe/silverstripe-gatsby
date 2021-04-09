@@ -1,26 +1,24 @@
 execute:
-  - SilverStripe\Gatsby\GraphQL\ClassNameCreator
-  - SilverStripe\Gatsby\GraphQL\TypeNameCreator
   - SilverStripe\Gatsby\GraphQL\ModelLoader
 resolvers:
   - SilverStripe\Gatsby\GraphQL\DataObjectResolver
   - SilverStripe\Gatsby\GraphQL\SyncResolver
   - SilverStripe\Gatsby\GraphQL\SchemaResolver
-inheritance:
-  interface_formatter: 'SilverStripe\Gatsby\GraphQL\ModelLoader::interfaceName'
 modelConfig:
   DataObject:
-    type_formatter: 'SilverStripe\Gatsby\GraphQL\ModelLoader::typeName'
+    type_formatter: 'SilverStripe\Core\ClassInfo::shortName'
     base_fields:
       ID: ID!
-      UUID: String
+      HashID: String
       TypeAncestry: '[[String]]'
-      BaseUUID: String
     plugins:
       versioning: false
+      #hideGhostNodes: true
     operations:
       read:
         plugins:
+          filter: true
+          paginateList: false
           readVersion: false
       readOne:
         plugins:

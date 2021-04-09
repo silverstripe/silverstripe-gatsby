@@ -4,10 +4,9 @@ sync:
     since:
       type: Int!
       description: Get a delta of changes since a timestamp
-    includeDraft:
-      type: Boolean
-      defaultValue: false
-      description: 'If true, include draft content (must be authenticated)'
+    stage:
+      type: VersionedStage!
+      description: 'Use DRAFT for previewing content, and LIVE for a public build'
     limit:
       type: Int
       defaultValue: 1000
@@ -17,7 +16,7 @@ sync:
       defaultValue: 0
       description: The offset of results to fetch
 schema:
-  type: String
+  type: JSONBlob
   args:
     prefix:
       type: String

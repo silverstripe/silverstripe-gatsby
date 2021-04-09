@@ -27,7 +27,7 @@ type <?= $type->getName() ?> <?php if (!empty($type->getInterfaces())): ?>implem
 <?php endforeach; ?>
 
 <?php foreach($interfaces as $interface): ?>
-interface <?= $interface->getName() ?> implements Node {
+interface <?= $interface->getName() ?> <?php if (!empty($interface->getInterfaces())): ?>implements <?= implode(' & ', $interface->getInterfaces()) ?><?php endif; ?> {
     <?php if (!$interface->getFieldByName('id')): ?>
         id: ID!
     <?php endif; ?>
