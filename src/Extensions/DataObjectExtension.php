@@ -13,7 +13,6 @@ use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\ManyManyList;
 use SilverStripe\ORM\ManyManyThroughList;
 use SilverStripe\ORM\RelationList;
-use SilverStripe\Snapshots\SnapshotHasher;
 use SilverStripe\Versioned\Versioned;
 use ReflectionException;
 
@@ -56,7 +55,7 @@ class DataObjectExtension extends DataExtension
                 }
                 $types[] = [
                     $config->getTypeNameForClass($class),
-                    SnapshotHasher::hashForSnapshot($class, $this->owner->ID),
+                    static::createHashID($class, $this->owner->ID),
                 ];
             }
         }
