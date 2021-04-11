@@ -8,3 +8,6 @@ SilverStripe\Core\Injector\Injector:
         contentChanged:
           on: ['trackedContentChanged']
           handler: '%$SilverStripe\Gatsby\Handler\ContentUpdateHandler'
+        gatsbySchemaBuild:
+          on: ['graphqlSchemaBuild']
+          handler: '%$SilverStripe\Gatsby\Handler\ClearSchemaCache'

@@ -4,15 +4,12 @@
 namespace SilverStripe\Gatsby\GraphQL;
 
 
-use SilverStripe\GraphQL\Schema\Field\ModelField;
+use Psr\SimpleCache\CacheInterface;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\SchemaBuilder;
 use SilverStripe\GraphQL\Schema\Storage\Encoder;
 use SilverStripe\GraphQL\Schema\Type\InputType;
-use SilverStripe\GraphQL\Schema\Type\ModelInterfaceType;
-use SilverStripe\GraphQL\Schema\Type\ModelType;
-use SilverStripe\GraphQL\Schema\Type\ModelUnionType;
-use SilverStripe\GraphQL\Schema\Type\Type;
 
 class SchemaResolver
 {
@@ -24,6 +21,12 @@ class SchemaResolver
     public static function resolveSchema($obj, $args): array
     {
         $prefix = $args['prefix'] ?? '';
+        /* @var CacheInterface $cache */
+        $cache = Injector::inst()->get(CacheInterface::class . '.SchemaResolver');
+        if ($cache->has($prefix)) {
+            return $cache->get($prefix);
+        }
+
         $schema = SchemaBuilder::singleton()->boot('gatsby')->createStoreableSchema();
 
         $types = [];
@@ -103,9 +106,13 @@ class SchemaResolver
             return $type instanceof InputType ? null : $type->getName();
         }, array_merge($types, $unions)));
 
-        return [
+        $response = [
             'schema' => $encoder->encode(),
             'types' => $typeNames,
         ];
+
+        $cache->set($prefix, $response);
+
+        return $response;
     }
 }

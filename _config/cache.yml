@@ -1,0 +1,8 @@
+---
+Name: gatsby-cache
+---
+SilverStripe\Core\Injector\Injector:
+  Psr\SimpleCache\CacheInterface.SchemaResolver:
+    factory: SilverStripe\Core\Cache\CacheFactory
+    constructor:
+      namespace: "GatsbySchema"
