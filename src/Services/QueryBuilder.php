@@ -100,7 +100,7 @@ class QueryBuilder
         $vars = $this->getVars();
         $args = $this->getArgs();
         $fields = $this->getFieldsForType($queryReturnType);
-        $fields += $this->getDefaultFields();
+        $fields = array_merge($fields, $this->getDefaultFields());
         $fieldLines = implode("\n", $fields);
 
         return <<<GRAPHQL

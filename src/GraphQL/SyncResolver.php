@@ -2,12 +2,7 @@
 
 namespace SilverStripe\Gatsby\GraphQL;
 
-use GraphQL\Type\Definition\InterfaceType;
-use GraphQL\Type\Definition\ObjectType;
-use GraphQL\Type\Definition\Type;
-use GraphQL\Type\Definition\UnionType;
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Gatsby\Extensions\DataObjectExtension;
 use SilverStripe\Gatsby\Model\PublishQueueItem;
 use SilverStripe\Gatsby\Services\ChangeTracker;
 use SilverStripe\Gatsby\Services\QueryBuilder;
@@ -16,18 +11,11 @@ use SilverStripe\GraphQL\QueryHandler\QueryStateProvider;
 use SilverStripe\GraphQL\QueryHandler\SchemaConfigProvider;
 use SilverStripe\GraphQL\QueryHandler\UserContextProvider;
 use SilverStripe\GraphQL\Schema\SchemaBuilder;
-use SilverStripe\GraphQL\Schema\Type\TypeReference;
 use SilverStripe\ORM\DataObject;
 use Exception;
-use SilverStripe\ORM\DB;
-use SilverStripe\ORM\Queries\SQLSelect;
 use SilverStripe\Security\Security;
-use SilverStripe\Snapshots\Snapshot;
 use SilverStripe\Gatsby\Config;
-use SilverStripe\Snapshots\SnapshotItem;
 use SilverStripe\Versioned\Versioned;
-use GraphQL\Type\Schema as GraphQLSchema;
-use InvalidArgumentException;
 use SilverStripe\Versioned\VersionedStateExtension;
 
 class SyncResolver
@@ -39,7 +27,7 @@ class SyncResolver
     const ERROR_MAX_LIMIT = 2;
 
     /**
-     * @return string
+     * @return array
      * @param mixed $obj
      * @param array $args
      * @throws Exception
@@ -62,7 +50,7 @@ class SyncResolver
         $everything = PublishQueueItem::get()->filter([
             'Stage' => [$stage, ChangeTracker::STAGE_ALL],
             'Created:GreaterThan' => $date,
-        ]);
+        ])->sort('Created ASC, ID ASC');
         $totalCount = $everything->count();
         $everything = $everything->limit($limit, $offset);
 

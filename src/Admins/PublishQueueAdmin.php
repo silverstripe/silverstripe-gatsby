@@ -6,6 +6,7 @@ namespace SilverStripe\Gatsby\Admins;
 use SilverStripe\Admin\ModelAdmin;
 use SilverStripe\Gatsby\Model\PublishEvent;
 use SilverStripe\Gatsby\Model\PublishQueueItem;
+use SilverStripe\Gatsby\Model\Webhook;
 use SilverStripe\Versioned\Versioned;
 
 class PublishQueueAdmin extends ModelAdmin
@@ -26,6 +27,7 @@ class PublishQueueAdmin extends ModelAdmin
     private static $managed_models = [
         PublishQueueItem::class,
         PublishEvent::class,
+        Webhook::class,
     ];
 
     public function getList()
@@ -45,6 +47,7 @@ class PublishQueueAdmin extends ModelAdmin
         $tabs = parent::getManagedModels();
         $tabs[PublishQueueItem::class]['title'] = _t(__CLASS__ . '.AWAITINGPUBLICATION', 'Awaiting publication');
         $tabs[PublishEvent::class]['title'] = _t(__CLASS__ . '.PUBLISHHISTORY', 'Publish history');
+        $tabs[Webhook::class]['title'] = _t(__CLASS__ . '.WEBHOOKS', 'Webhooks');
 
         return $tabs;
     }

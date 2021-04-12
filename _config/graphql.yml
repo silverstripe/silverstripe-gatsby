@@ -9,10 +9,6 @@ SilverStripe\Core\Injector\Injector:
     class: SilverStripe\GraphQL\Controller
     constructor:
       schema: gatsby
-#  SilverStripe\GraphQL\Schema\Registry\PluginRegistry:
-#    constructor:
-#      - 'SilverStripe\Gatsby\GraphQL\HideGhostNodes'
-
 SilverStripe\GraphQL\Schema\Schema:
   schemas:
     gatsby:

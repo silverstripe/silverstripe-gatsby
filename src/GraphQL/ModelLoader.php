@@ -105,7 +105,7 @@ class ModelLoader implements SchemaUpdater
         $blacklist = static::config()->get('excluded_dataobjects');
         $whitelist = static::config()->get('included_dataobjects');
 
-        $classes = ClassInfo::subclassesFor(DataObject::class, false);
+        $classes = array_values(ClassInfo::subclassesFor(DataObject::class, false));
         $classes = array_filter($classes, function ($class) use ($blacklist, $whitelist) {
             $included = empty($whitelist);
             foreach ($whitelist as $pattern) {
