@@ -21,13 +21,17 @@ class SchemaResolver
     public static function resolveSchema($obj, $args): array
     {
         $prefix = $args['prefix'] ?? '';
+
         /* @var CacheInterface $cache */
         $cache = Injector::inst()->get(CacheInterface::class . '.SchemaResolver');
         if ($cache->has($prefix)) {
             return $cache->get($prefix);
         }
 
-        $schema = SchemaBuilder::singleton()->boot('gatsby')->createStoreableSchema();
+        $schema = SchemaBuilder::singleton()->boot('gatsby');
+        $directives = ModelLoader::getDirectives($schema);
+
+        $schema = $schema->createStoreableSchema();
 
         $types = [];
         $unions = [];
@@ -51,7 +55,10 @@ class SchemaResolver
                 continue;
             }
 
-            $type->setName($renamed[$type->getName()]);
+            $oldName = $type->getName();
+            $type->setName($renamed[$oldName]);
+            $directives[$type->getName()] = $directives[$oldName] ?? [];
+            unset($directives[$oldName]);
 
             foreach ($type->getFields() as $field) {
                 $newName = $renamed[$field->getNamedType()] ?? null;
@@ -94,6 +101,7 @@ class SchemaResolver
             __DIR__ . '/../../includes/schema.inc.php',
             $schema,
             [
+                'directives' => $directives,
                 'types' => $types,
                 'interfaces' => $interfaces,
                 'enums' => $enums,

@@ -9,6 +9,7 @@ SilverStripe\Gatsby\GraphQL\ModelLoader:
     siteTreeLink: 'SilverStripe\CMS\Model\SiteTreeLink'
     cmsEditHistory: 'SilverStripe\Gatsby\*'
     apiKey: 'Sminnee\ApiKey\*'
+    errorPage: 'SilverStripe\ErrorPage\*'
 ---
 Name: modelloader-exclude-snapshots
 Only:

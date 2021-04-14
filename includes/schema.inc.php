@@ -15,12 +15,24 @@ $unions = $globals['unions'];
 $enums = $globals['enums'];
 /* @var \SilverStripe\GraphQL\Schema\Type\Scalar[] $scalars */
 $scalars = $globals['scalars'];
+/* @var array $directives */
+$directives = $globals['directives'];
+
+$typeDirectives = function (\SilverStripe\GraphQL\Schema\Type\Type $type) use($directives)
+{
+    return implode(' ', $directives[$type->getName()]['directives'] ?? []);
+};
+$fieldDirectives = function (\SilverStripe\GraphQL\Schema\Type\Type $type, \SilverStripe\GraphQL\Schema\Field\Field $field) use($directives)
+{
+    return implode(' ', $directives[$type->getName()]['fields'][$field->getName()] ?? []);
+};
+
 ?>
 
 <?php foreach($types as $type): ?>
-type <?= $type->getName() ?> <?php if (!empty($type->getInterfaces())): ?>implements <?= implode(' & ', $type->getInterfaces()) ?><?php endif; ?> @dontInfer {
+type <?= $type->getName() ?> <?php if (!empty($type->getInterfaces())): ?>implements <?= implode(' & ', $type->getInterfaces()) ?><?php endif; ?> @dontInfer <?= $typeDirectives($type) ?> {
     <?php foreach ($type->getFields() as $field): ?>
-        <?= $field->getName() ?>: <?= $field->getType() ?>
+        <?= $field->getName() ?>: <?= $field->getType() ?> <?= $fieldDirectives($type, $field) ?>
 
     <?php endforeach; ?>
 }

@@ -11,10 +11,12 @@ use SilverStripe\Core\Config\Configurable;
 use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Gatsby\Config;
+use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Field\ModelField;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
 use SilverStripe\GraphQL\Schema\Schema;
+use SilverStripe\GraphQL\Schema\StorableSchema;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
@@ -72,9 +74,12 @@ class ModelLoader implements SchemaUpdater
 
                     // todo: Figure out lowest exposed class, instead of 'Page'
                     if ($sng instanceof SiteTree) {
-                        //$siteTree = $schema->getConfig()->getTypeNameForClass(SiteTree::class);
                         $model->getFieldByName('childNodes')->setType('[Page]');
                         $model->getFieldByName('parentNode')->setType('Page');
+                        $model->addField('breadcrumbs', [
+                            'type' => '[Page]',
+                            'property' => 'NavigationPath',
+                        ]);
                     } elseif ($sng instanceof File) {
                         $file = $schema->getConfig()->getTypeNameForClass(File::class);
                         $model->getFieldByName('childNodes')->setType('[' . $file . ']');
@@ -129,6 +134,76 @@ class ModelLoader implements SchemaUpdater
         return $classes;
     }
 
+
+    public static function getDirectives(Schema $schema): array
+    {
+        $directives = [];
+        foreach ($schema->getModels() as $modelType) {
+            if (!$modelType->getModel() instanceof DataObjectModel) {
+                return $directives;
+            }
+            $name = $modelType->getName();
+            $directives[$name] = [
+                'directives' => [],
+                'fields' => [],
+            ];
+
+            $defaultSort = static::getDefaultSort($modelType);
+            if ($defaultSort) {
+                list($column, $direction) = $defaultSort;
+                $directives[$name]['directives'] = [
+                    sprintf('@defaultSort(column: "%s", direction: "%s")', $column, $direction),
+                ];
+            }
+            if ($modelType->getFieldByName('breadcrumbs')) {
+                $directives[$name]['fields']['breadcrumbs'] = ['@serialised'];
+            }
+        }
+
+        return $directives;
+    }
+
+    /**
+     * @param ModelType $modelType
+     * @return array|null
+     */
+    private static function getDefaultSort(ModelType $modelType): ?array
+    {
+        $sng = DataObject::singleton($modelType->getModel()->getSourceClass());
+        $defaultSort = $sng->config()->get('default_sort');
+        if (!$defaultSort) {
+            return null;
+        }
+
+        if (!is_string($defaultSort)) {
+            Schema::message('Cannot apply default sort for ' . $modelType->getName() . '. Must be a string.');
+            return null;
+        }
+
+        $clauses = explode(',', $defaultSort);
+        if (sizeof($clauses) > 1) {
+            Schema::message(
+                'Multiple default_sort clauses are not allowed.
+                    Using the first one only on ' . $modelType->getName()
+            );
+        }
+        $clause = $clauses[0];
+        if (preg_match('/^(.*)(asc|desc)$/i', $clause, $matches)) {
+            $column = trim($matches[1]);
+            $direction = strtoupper($matches[2]);
+        } else {
+            $column = $clause;
+            $direction = 'ASC';
+        }
+        $column = preg_replace('/[^A-Za-z0-9_]/', '', $column);
+        $fieldName = $modelType->getModel()->getFieldAccessor()->formatField($column);
+        if ($modelType->getFieldByName($fieldName)) {
+            return [$fieldName, $direction];
+        }
+
+        return null;
+
+    }
     /**
      * @param string $class
      * @return bool

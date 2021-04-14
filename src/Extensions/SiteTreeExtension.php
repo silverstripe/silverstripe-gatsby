@@ -15,6 +15,6 @@ class SiteTreeExtension extends DataExtension
      */
     public function modelascontrollerInit(ModelAsController $controller)
     {
-        $controller->getResponse()->setStatusCode(404);
+        //$controller->getResponse()->setStatusCode(404);
     }
 }
