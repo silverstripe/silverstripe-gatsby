@@ -2,4 +2,6 @@
 Name: headless-routes
 After: '#modelascontrollerroutes'
 ---
-#
+SilverStripe\Control\Director:
+  rules:
+    '': '->admin'
