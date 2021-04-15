@@ -11,6 +11,7 @@ use SilverStripe\Gatsby\Model\PublishQueueItem;
 use SilverStripe\Gatsby\Services\ChangeTracker;
 use SilverStripe\ORM\DataList;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
 
 class SeedTask extends BuildTask
@@ -64,7 +65,10 @@ class SeedTask extends BuildTask
         }
 
         // Clean slate
-        PublishQueueItem::get()->removeAll();
+        $tableName = DataObject::getSchema()->tableName(PublishQueueItem::class);
+        echo "Clearing out previous state";
+        echo static::br();
+        DB::query("DELETE FROM \"$tableName\"");
 
         echo static::br();
         echo static::br();
