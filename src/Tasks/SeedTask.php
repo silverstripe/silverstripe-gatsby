@@ -38,6 +38,9 @@ class SeedTask extends BuildTask
             echo "Processing $total records" . static::br();
             /* @var DataObject&Versioned $record */
             foreach ($list as $record) {
+                if (!ModelLoader::includes($record)) {
+                    continue;
+                }
                 if (!$record->hasExtension(Versioned::class) || !$record->hasStages() || !$record->stagesDiffer()) {
                     ChangeTracker::singleton()->record(
                         $record,

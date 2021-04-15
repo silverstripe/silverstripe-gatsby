@@ -88,7 +88,7 @@ class DataObjectExtension extends DataExtension
      */
     public function onAfterWrite()
     {
-        if (!ModelLoader::includesClass($this->owner->baseClass())) {
+        if (!ModelLoader::includes($this->owner)) {
             return;
         }
 
@@ -105,7 +105,7 @@ class DataObjectExtension extends DataExtension
      */
     public function onAfterDelete()
     {
-        if (!ModelLoader::includesClass($this->owner->baseClass())) {
+        if (!ModelLoader::includes($this->owner)) {
             return;
         }
 
@@ -122,7 +122,7 @@ class DataObjectExtension extends DataExtension
      */
     public function onAfterPublish()
     {
-        if (!ModelLoader::includesClass($this->owner->baseClass())) {
+        if (!ModelLoader::includes($this->owner)) {
             return;
         }
 
@@ -138,7 +138,7 @@ class DataObjectExtension extends DataExtension
      */
     public function onAfterUnpublish()
     {
-        if (!ModelLoader::includesClass($this->owner->baseClass())) {
+        if (!ModelLoader::includes($this->owner)) {
             return;
         }
 
@@ -154,7 +154,7 @@ class DataObjectExtension extends DataExtension
      */
     public function onAfterArchive()
     {
-        if (!ModelLoader::includesClass($this->owner->baseClass())) {
+        if (!ModelLoader::includes($this->owner)) {
             return;
         }
 

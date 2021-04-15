@@ -10,6 +10,7 @@ SilverStripe\Gatsby\GraphQL\ModelLoader:
     cmsEditHistory: 'SilverStripe\Gatsby\*'
     apiKey: 'Sminnee\ApiKey\*'
     errorPage: 'SilverStripe\ErrorPage\*'
+    folder: 'SilverStripe\Assets\Folder'
 ---
 Name: modelloader-exclude-snapshots
 Only:

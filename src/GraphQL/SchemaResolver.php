@@ -40,10 +40,14 @@ class SchemaResolver
         $scalars = $schema->getScalars();
 
         $allTypes = $schema->getTypes();
-        $renamed = [];
+
         foreach (array_merge($allTypes, $schema->getInterfaces(), $schema->getUnions()) as $type) {
             $renamed[$type->getName()] = sprintf('%s%s', $prefix, $type->getName());
         }
+
+        // Deal with the naming collision of File
+        $renamed['GatsbyFile'] = 'File';
+
         foreach ($allTypes as $type) {
             if ($type instanceof InputType) {
                 continue;

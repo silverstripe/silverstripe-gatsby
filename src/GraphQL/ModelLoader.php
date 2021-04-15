@@ -18,6 +18,7 @@ use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\StorableSchema;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
+use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\Versioned\Versioned;
 use ReflectionException;
@@ -51,6 +52,12 @@ class ModelLoader implements SchemaUpdater
     public static function updateSchema(Schema $schema): void
     {
         $classes = static::getIncludedClasses();
+        $schema->addType(Type::create('GatsbyFile', [
+            'fields' => [
+                'hashID' => 'ID',
+            ]
+        ]));
+
         foreach ($classes as $class) {
             $schema->addModelbyClassName($class, function (ModelType $model) use ($schema) {
                 $model->addAllFields();
@@ -70,6 +77,11 @@ class ModelLoader implements SchemaUpdater
                         'property' => 'Children',
                     ]);
                     $sng = Injector::inst()->get($model->getModel()->getSourceClass());
+
+                    if ($sng instanceof File) {
+                        $model->addField('absoluteLink', 'String');
+                        $model->addField('localFile', 'GatsbyFile');
+                    }
                     // Special case for core hierarchies
 
                     // todo: Figure out lowest exposed class, instead of 'Page'
@@ -204,14 +216,20 @@ class ModelLoader implements SchemaUpdater
         return null;
 
     }
+
     /**
-     * @param string $class
+     * @param DataObject $obj
      * @return bool
      * @throws ReflectionException
      */
-    public static function includesClass(string $class): bool
+    public static function includes(DataObject $obj): bool
     {
-        return in_array($class, static::getIncludedClasses());
+        $included =  true;
+        $obj->invokeWithExtensions('updateModelLoaderIncluded', $included);
+        if (!$included) {
+            return false;
+        }
+        return in_array($obj->ClassName, static::getIncludedClasses());
     }
 
     /**
