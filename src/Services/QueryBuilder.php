@@ -188,7 +188,7 @@ GRAPHQL;
             if (Type::isBuiltInType($typeObj)) {
                 $selectFields[$fieldDefinition->name] = $fieldDefinition->name;
             } else {
-                if ($typeObj instanceof ObjectType) {
+                if ($typeObj instanceof ObjectType || $typeObj instanceof InterfaceType) {
                     if ($typeObj->hasField('id')) {
                         $selectFields[$fieldDefinition->name] = sprintf(
                             '%s { %s }',
