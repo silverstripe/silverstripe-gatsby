@@ -85,14 +85,13 @@ class ModelLoader implements SchemaUpdater
                     }
                     // Special case for core hierarchies
 
-                    // todo: Figure out lowest exposed class, instead of 'Page'
                     if ($sng instanceof SiteTree) {
-                        $modelName = $schema->getConfig()->getTypeNameForClass('Page');
+                        $modelName = $schema->getConfig()->getTypeNameForClass(SiteTree::class);
                         $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
                         $model->getFieldByName('childNodes')->setType("[$unionName]");
                         $model->getFieldByName('parentNode')->setType($unionName);
                         $model->addField('breadcrumbs', [
-                            'type' => '[Page]',
+                            'type' => "[$modelName]",
                             'property' => 'NavigationPath',
                         ]);
                     } elseif ($sng instanceof File) {
