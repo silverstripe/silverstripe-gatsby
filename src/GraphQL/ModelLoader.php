@@ -13,6 +13,7 @@ use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Gatsby\Config;
 use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
 use SilverStripe\GraphQL\Schema\DataObject\InheritanceUnionBuilder;
+use SilverStripe\GraphQL\Schema\DataObject\InterfaceBuilder;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Field\ModelField;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
@@ -90,8 +91,9 @@ class ModelLoader implements SchemaUpdater
                         $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
                         $model->getFieldByName('childNodes')->setType("[$unionName]");
                         $model->getFieldByName('parentNode')->setType($unionName);
+                        $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
                         $model->addField('breadcrumbs', [
-                            'type' => "[$modelName]",
+                            'type' => "[$interfaceName]",
                             'property' => 'NavigationPath',
                         ]);
                     } elseif ($sng instanceof File) {

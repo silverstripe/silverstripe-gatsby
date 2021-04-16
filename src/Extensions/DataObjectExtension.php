@@ -76,9 +76,9 @@ class DataObjectExtension extends DataExtension
         $ancestors = array_reverse($this->owner->getAncestors()->toArray());
         /** @var DataObject $ancestor */
         foreach ($ancestors as $ancestor) {
-            $crumbs[] = $ancestor->newClassInstance('Page');
+            $crumbs[] = $ancestor;
         }
-        $crumbs[] = $this->owner->newClassInstance('Page');
+        $crumbs[] = $this->owner;
 
         return $crumbs;
     }
