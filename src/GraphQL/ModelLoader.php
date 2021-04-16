@@ -12,6 +12,7 @@ use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Gatsby\Config;
 use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
+use SilverStripe\GraphQL\Schema\DataObject\InheritanceUnionBuilder;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Field\ModelField;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
@@ -86,16 +87,19 @@ class ModelLoader implements SchemaUpdater
 
                     // todo: Figure out lowest exposed class, instead of 'Page'
                     if ($sng instanceof SiteTree) {
-                        $model->getFieldByName('childNodes')->setType('[Page]');
-                        $model->getFieldByName('parentNode')->setType('Page');
+                        $modelName = $schema->getConfig()->getTypeNameForClass('Page');
+                        $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
+                        $model->getFieldByName('childNodes')->setType("[$unionName]");
+                        $model->getFieldByName('parentNode')->setType($unionName);
                         $model->addField('breadcrumbs', [
                             'type' => '[Page]',
                             'property' => 'NavigationPath',
                         ]);
                     } elseif ($sng instanceof File) {
-                        $file = $schema->getConfig()->getTypeNameForClass(File::class);
-                        $model->getFieldByName('childNodes')->setType('[' . $file . ']');
-                        $model->getFieldByName('parentNode')->setType($file);
+                        $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
+                        $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
+                        $model->getFieldByName('childNodes')->setType("[$unionName]");
+                        $model->getFieldByName('parentNode')->setType($unionName);
                     }
 
                 }

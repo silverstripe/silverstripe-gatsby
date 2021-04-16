@@ -5,6 +5,7 @@ namespace SilverStripe\Gatsby\GraphQL;
 
 
 use Psr\SimpleCache\CacheInterface;
+use SilverStripe\Assets\File;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\SchemaBuilder;
@@ -28,10 +29,10 @@ class SchemaResolver
             return $cache->get($prefix);
         }
 
-        $schema = SchemaBuilder::singleton()->boot('gatsby');
-        $directives = ModelLoader::getDirectives($schema);
+        $baseSchema = SchemaBuilder::singleton()->boot('gatsby');
+        $directives = ModelLoader::getDirectives($baseSchema);
 
-        $schema = $schema->createStoreableSchema();
+        $schema = $baseSchema->createStoreableSchema();
 
         $types = [];
         $unions = [];
@@ -45,10 +46,22 @@ class SchemaResolver
             $renamed[$type->getName()] = sprintf('%s%s', $prefix, $type->getName());
         }
 
+        $fileTypes = [];
+        foreach ($baseSchema->getModels() as $modelType) {
+            $class = $modelType->getModel()->getSourceClass();
+            if ($class === File::class || is_subclass_of($class, File::class)) {
+                $fileTypes[] = $renamed[$modelType->getName()] ?? $modelType->getName();
+            }
+        }
+
         // Deal with the naming collision of File
         $renamed['GatsbyFile'] = 'File';
+        $skip = ['GatsbyFile'];
 
         foreach ($allTypes as $type) {
+            if (in_array($type->getName(), $skip)) {
+                continue;
+            }
             if ($type instanceof InputType) {
                 continue;
             }
@@ -121,6 +134,7 @@ class SchemaResolver
         $response = [
             'schema' => $encoder->encode(),
             'types' => $typeNames,
+            'files' => $fileTypes,
         ];
 
         $cache->set($prefix, $response);
