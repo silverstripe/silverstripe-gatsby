@@ -28,6 +28,10 @@ class PublishQueueItem extends DataObject
         'Type' => true,
         'Stage' => true,
         'ObjectHash' => true,
+        'Object' => [
+            'type' => 'unique',
+            'columns' => ['ObjectID', 'ObjectClass', 'Stage'],
+        ]
     ];
 
     /**

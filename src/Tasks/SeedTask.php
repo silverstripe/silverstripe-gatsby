@@ -4,15 +4,11 @@
 namespace SilverStripe\Gatsby\Tasks;
 
 
-use SilverStripe\Control\Director;
+use Psr\Log\LoggerInterface;
+use SilverStripe\Control\HTTPRequest;
+use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\BuildTask;
-use SilverStripe\Gatsby\GraphQL\ModelLoader;
-use SilverStripe\Gatsby\Model\PublishQueueItem;
-use SilverStripe\Gatsby\Services\ChangeTracker;
-use SilverStripe\ORM\DataList;
-use SilverStripe\ORM\DataObject;
-use SilverStripe\ORM\DB;
-use SilverStripe\Versioned\Versioned;
+use SilverStripe\Gatsby\Services\Migrator;
 
 class SeedTask extends BuildTask
 {
@@ -20,64 +16,39 @@ class SeedTask extends BuildTask
 
     protected  $description = 'Seeds the change tracker with all the tracked content in the CMS';
 
+    /**
+     * @var Migrator
+     */
+    private $migrator;
+
+    /**
+     * MigrationTask constructor.
+     * @param Migrator $service
+     */
+    public function __construct(Migrator $service)
+    {
+        parent::__construct();
+        $this->migrator = $service;
+    }
+
+    /**
+     * @param HTTPRequest $request
+     */
     public function run($request)
     {
-        $baseClasses = [];
-        foreach (ModelLoader::getIncludedClasses() as $class) {
-            $baseClass = DataObject::singleton($class)->baseClass();
-            $baseClasses[$baseClass] = $baseClass;
-        }
+        $logger = Injector::inst()->get(LoggerInterface::class);
 
-        if (class_exists(Versioned::class)) {
-            Versioned::set_stage(Versioned::DRAFT);
-        }
-        foreach ($baseClasses as $class) {
-            echo $class . static::br();
-            // todo: chunk https://github.com/silverstripe/silverstripe-framework/pull/8940
-            $list = DataList::create($class);
-            $total = $list->count();
-            echo "Processing $total records" . static::br();
-            /* @var DataObject&Versioned $record */
-            foreach ($list as $record) {
-                if (!ModelLoader::includes($record)) {
-                    continue;
-                }
-                if (!$record->hasExtension(Versioned::class) || !$record->hasStages() || !$record->stagesDiffer()) {
-                    ChangeTracker::singleton()->record(
-                        $record,
-                        ChangeTracker::TYPE_UPDATED,
-                        ChangeTracker::STAGE_ALL
-                    );
-                    continue;
-                }
-                $stages = array_filter([
-                    $record->isModifiedOnDraft() ? Versioned::DRAFT : null,
-                    $record->isPublished() ? Versioned::LIVE : null,
-                ]);
-                foreach ($stages as $stage) {
-                    ChangeTracker::singleton()->record(
-                        $record,
-                        ChangeTracker::TYPE_UPDATED,
-                        $stage
-                    );
-                }
-            }
-        }
+        $logger->info('Prepping database...');
+        $this->migrator->setup();
+        $classes = $this->migrator->getClassesToMigrate();
+        $logger->info('Migrating ' . sizeof($classes) . ' classes');
 
-        // Clean slate
-        $tableName = DataObject::getSchema()->tableName(PublishQueueItem::class);
-        echo "Clearing out previous state";
-        echo static::br();
-        DB::query("DELETE FROM \"$tableName\"");
-
-        echo static::br();
-        echo static::br();
-        $count = count(ChangeTracker::getQueue());
-        echo "--- Persisting $count entries to the change tracker. This make take a while... ---" . static::br();
+        foreach ($classes as $class) {
+            $logger->info("Migrating $class");
+            $rows = $this->migrator->migrate($class);
+            $logger->info("$rows records migrated");
+        }
+        $this->migrator->tearDown();
     }
 
-    private static function br(): string
-    {
-        return Director::is_cli() ? PHP_EOL : "<br>";
-    }
 }

@@ -1,0 +1,7 @@
+---
+Name: content-seed-migration
+---
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Gatsby\Tasks\SeedTask:
+    constructor:
+      migrator: '%$SilverStripe\Gatsby\Services\Migrator'
