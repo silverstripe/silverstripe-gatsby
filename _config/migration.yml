@@ -5,3 +5,6 @@ SilverStripe\Core\Injector\Injector:
   SilverStripe\Gatsby\Tasks\SeedTask:
     constructor:
       migrator: '%$SilverStripe\Gatsby\Services\Migrator'
+  SilverStripe\Gatsby\Tasks\PurgeTask:
+    constructor:
+      migrator: '%$SilverStripe\Gatsby\Services\Migrator'

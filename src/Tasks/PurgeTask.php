@@ -9,18 +9,19 @@ use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\BuildTask;
 use SilverStripe\Gatsby\Services\Migrator;
+use ReflectionException;
 
-class SeedTask extends BuildTask
+class PurgeTask extends BuildTask
 {
     /**
      * @var string
      */
-    private static $segment = 'seed-change-tracker';
+    private static $segment = 'purge-change-tracker';
 
     /**
      * @var string
      */
-    protected  $description = 'Seeds the change tracker with all the tracked content in the CMS';
+    protected  $description = 'Purges records that do not belong in the change tracker for publishing';
 
     /**
      * @var Migrator
@@ -39,22 +40,15 @@ class SeedTask extends BuildTask
 
     /**
      * @param HTTPRequest $request
+     * @throws ReflectionException
      */
     public function run($request)
     {
         $logger = Injector::inst()->get(LoggerInterface::class);
 
-        $logger->info('Prepping database...');
-        $this->migrator->setup();
         $classes = $this->migrator->getClassesToMigrate();
-        $logger->info('Migrating ' . sizeof($classes) . ' classes');
+        $logger->info('Purging ' . sizeof($classes) . ' classes');
 
-        foreach ($classes as $class) {
-            $logger->info("Migrating $class");
-            $rows = $this->migrator->migrate($class);
-            $logger->info("$rows records migrated");
-        }
-        $logger->info("Purging individual records...");
         foreach ($classes as $class) {
             $rows = $this->migrator->purge($class);
             if (!empty($rows)) {

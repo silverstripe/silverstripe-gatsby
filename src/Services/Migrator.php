@@ -68,6 +68,40 @@ SQL;
     }
 
     /**
+     * Goes through record by record to see if there are any instance-level checks on inclusion.
+     * This is a much slower procedural process, but most dataobjects should not do these types of checks.
+     * @param string $baseClass
+     * @return array
+     * @throws \ReflectionException
+     */
+    public function purge(string $baseClass): array
+    {
+        /* @var DataObject $sng */
+        $sng = $baseClass::singleton();
+        $purge = [];
+
+        // Only purge when the class has this method exposed. Otherwise, we can assume
+        // there is no per-record filtering
+        if (!$sng->hasMethod('updateModelLoaderIncluded')) {
+            return $purge;
+        }
+
+        $records = PublishQueueItem::get()->filter([
+            'ObjectClass' => $baseClass,
+        ]);
+        foreach ($records->chunkedFetch() as $record) {
+            if (!ModelLoader::includes($record)) {
+                $purge[]= $record->ID;
+            }
+        }
+        if (!empty($purge)) {
+            $records->filter('ObjectID', $purge)->removeAll();
+        }
+
+        return $purge;
+    }
+
+    /**
      * @return array
      */
     public function getClassesToMigrate(): array
@@ -235,5 +269,5 @@ SQL;
     {
         return str_replace('\\', '\\\\', $class);
     }
-    
+
 }
