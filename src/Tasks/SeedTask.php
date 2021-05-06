@@ -8,6 +8,7 @@ use Psr\Log\LoggerInterface;
 use SilverStripe\Control\HTTPRequest;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Dev\BuildTask;
+use SilverStripe\Gatsby\Model\PublishQueueItem;
 use SilverStripe\Gatsby\Services\Migrator;
 
 class SeedTask extends BuildTask
@@ -61,7 +62,6 @@ class SeedTask extends BuildTask
                 $logger->info("Purged " . count($rows) . " records from $class");
             }
         }
-
         $this->migrator->tearDown();
     }
 

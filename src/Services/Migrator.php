@@ -91,7 +91,7 @@ SQL;
         ]);
         foreach ($records->chunkedFetch() as $record) {
             if (!ModelLoader::includes($record)) {
-                $purge[]= $record->ID;
+                $purge[] = $record->ID;
             }
         }
         if (!empty($purge)) {
@@ -120,6 +120,12 @@ SQL;
 
     public function tearDown(): void
     {
+        // Due to the allow/disallow list of classes, there are some cases where
+        // the class name lookup will not get a match. These records don't belong
+        // in the queue.
+        PublishQueueItem::get()->where("\"ObjectClass\" IS NULL")
+            ->removeAll();
+
         $this->removeTemporaryTable();
     }
 
@@ -129,7 +135,7 @@ SQL;
      */
     private function migrateVersionsTable(string $versionsTable): int
     {
-        $live = Versioned::LIVE;
+        $all = ChangeTracker::STAGE_ALL;
         $draft = Versioned::DRAFT;
         DB::query(
             "INSERT INTO \"$this->tableName\"
@@ -147,17 +153,17 @@ SQL;
                     \"Created\",
                     \"LastEdited\",
                     'UPDATED',
-                    CASE WHEN \"WasPublished\" = 1 THEN '$live' ELSE '$draft' END,
+                    CASE WHEN \"WasPublished\" = 1 THEN '$all' ELSE '$draft' END,
                     MD5(CONCAT($this->baseClassSubquery, ':', \"RecordID\")),
                     \"RecordID\",
                     $this->baseClassSubquery
                 FROM
-                    \"$versionsTable\"
+                    \"$versionsTable\" AS v1
                 WHERE
                     \"WasDeleted\" = 0 AND \"Version\" = (
                         SELECT MAX(\"Version\")
-                            FROM \"$versionsTable\"
-                            WHERE \"RecordID\" = RecordID
+                            FROM \"$versionsTable\" AS v2
+                            WHERE \"v1\".\"RecordID\" = \"v2\".\"RecordID\"
                         )
                 ORDER BY \"ID\" ASC
             )
