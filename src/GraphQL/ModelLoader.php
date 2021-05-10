@@ -22,6 +22,7 @@ use SilverStripe\GraphQL\Schema\StorableSchema;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\ORM\Hierarchy\Hierarchy;
 use SilverStripe\Versioned\Versioned;
 use ReflectionException;
 
@@ -54,39 +55,45 @@ class ModelLoader implements SchemaUpdater
     public static function updateSchema(Schema $schema): void
     {
         $classes = static::getIncludedClasses();
-        $schema->addType(Type::create('GatsbyFile', [
-            'fields' => [
-                'hashID' => 'ID',
-            ]
-        ]));
-
         foreach ($classes as $class) {
             $schema->addModelbyClassName($class, function (ModelType $model) use ($schema) {
                 $model->addAllFields();
                 // Special case for link
                 if ($model->getModel()->hasField('link')) {
                     $model->addField('link', 'String');
+                    $model->addInterface('Linkable');
                 }
-                if ($model->getModel()->hasField('parent')) {
-                    $model->removeField('parent');
-                    $model->addField('parentNode', [
-                        'property' => 'Parent',
-                    ]);
+                $sng = Injector::inst()->get($model->getModel()->getSourceClass());
+                if ($sng->hasExtension(Hierarchy::class)) {
+                    $model->removeField('children')
+                        ->addField('childNodes', [
+                            'property' => 'Children',
+                        ])
+                        ->addField('navChildren', [
+                            'property' => 'Children',
+                        ])
+                        ->removeField('parent')
+                        ->addField('parentNode', [
+                            'property' => 'Parent',
+                        ])
+                        ->addField('navParent', [
+                            'property' => 'Parent',
+                        ]);
                 }
                 if ($model->getModel()->hasField('children')) {
                     $model->removeField('children');
-                    $model->addField('childNodes', [
-                        'property' => 'Children',
-                    ]);
-                    $sng = Injector::inst()->get($model->getModel()->getSourceClass());
+                    $model;
 
                     if ($sng instanceof File) {
                         $model->addField('absoluteLink', 'String');
                         $model->addField('localFile', 'GatsbyFile');
-                    }
-                    // Special case for core hierarchies
 
-                    if ($sng instanceof SiteTree) {
+                        $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
+                        $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
+                        $model->getFieldByName('childNodes')->setType("[$unionName]");
+                        $model->getFieldByName('parentNode')->setType($unionName);
+
+                    } elseif ($sng instanceof SiteTree) {
                         $modelName = $schema->getConfig()->getTypeNameForClass(SiteTree::class);
                         $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
                         $model->getFieldByName('childNodes')->setType("[$unionName]");
@@ -96,11 +103,6 @@ class ModelLoader implements SchemaUpdater
                             'type' => "[$interfaceName]",
                             'property' => 'NavigationPath',
                         ]);
-                    } elseif ($sng instanceof File) {
-                        $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
-                        $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
-                        $model->getFieldByName('childNodes')->setType("[$unionName]");
-                        $model->getFieldByName('parentNode')->setType($unionName);
                     }
 
                 }
@@ -151,7 +153,10 @@ class ModelLoader implements SchemaUpdater
         return $classes;
     }
 
-
+    /**
+     * @param Schema $schema
+     * @return array
+     */
     public static function getDirectives(Schema $schema): array
     {
         $directives = [];

@@ -1,0 +1,18 @@
+Linkable:
+  fields:
+    link: String
+Menuable:
+  fields:
+    link: String
+    menuTitle: String
+    showInMenus: Boolean
+  interfaces: [Linkable]
+Hierarchical:
+  fields:
+    link: String
+    menuTitle: String
+    showInMenus: Boolean
+    navParent: Hierarchical
+    navChildren: '[Hierarchical]'
+  interfaces: [Menuable]
+
