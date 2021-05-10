@@ -4,10 +4,12 @@
 namespace SilverStripe\Gatsby\Services;
 
 
+use SilverStripe\Core\Config\Config;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\Core\Injector\Injector;
 use SilverStripe\Gatsby\GraphQL\ModelLoader;
 use SilverStripe\Gatsby\Model\PublishQueueItem;
+use SilverStripe\ORM\Connect\MySQLDatabase;
 use SilverStripe\ORM\DataObject;
 use SilverStripe\ORM\DB;
 use SilverStripe\Versioned\Versioned;
@@ -80,8 +82,10 @@ SQL;
         $sng = $baseClass::singleton();
         $purge = [];
 
-        // Only purge when the class has this method exposed. Otherwise, we can assume
-        // there is no per-record filtering
+        if (!$sng->config()->get('apply_publish_queue_filter')) {
+            return $purge;
+        }
+
         if (!$sng->hasMethod('updateModelLoaderIncluded')) {
             return $purge;
         }
@@ -211,12 +215,19 @@ SQL;
 
     private function createTemporaryTable()
     {
+        $charset = Config::inst()->get(MySQLDatabase::class, 'charset');
+        $collation = Config::inst()->get(MySQLDatabase::class, 'collation');
+
         DB::query("DROP TABLE IF EXISTS \"__ClassNameLookup\"");
         DB::create_table(
             '__ClassNameLookup',
             [
-                'ObjectClassName' => 'varchar(255) not null',
-                'BaseClassName' => 'varchar(255) not null',
+                'ObjectClassName' => "varchar(255) not null",
+                'BaseClassName' => "varchar(255) not null",
+            ],
+            [],
+            [
+                'MySQLDatabase' => "ENGINE=InnoDB DEFAULT CHARSET=$charset COLLATE=$collation"
             ]
         );
         $lines = [];

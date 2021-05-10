@@ -20,6 +20,12 @@ use ReflectionException;
 class DataObjectExtension extends DataExtension
 {
     /**
+     * @var bool
+     * @config
+     */
+    private static $apply_publish_queue_filter = true;
+
+    /**
      * @param string $class
      * @param int $id
      * @return string

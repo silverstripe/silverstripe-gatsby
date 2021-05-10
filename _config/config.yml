@@ -7,7 +7,7 @@ SilverStripe\ORM\DataObject:
     - SilverStripe\Gatsby\Extensions\SiteTreeExtension
 SilverStripe\Assets\File:
   extensions:
-    - SilverStripe\Gatsby\Extensions\FileExtension
+    - SilverStripe\Gatsby\Extensions\UsedFileExtension
 SilverStripe\Admin\Forms\UsedOnTable:
   extensions:
     - SilverStripe\Gatsby\Extensions\UsedOnTableExtension
