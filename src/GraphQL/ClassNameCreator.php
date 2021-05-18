@@ -13,7 +13,7 @@ use SilverStripe\ORM\DataObject;
 
 class ClassNameCreator implements SchemaUpdater
 {
-    public static function updateSchema(Schema $schema): void
+    public static function updateSchema(Schema $schema, array $config = []): void
     {
         $classes = ClassInfo::subclassesFor(DataObject::class, false);
         $classes = array_map([static::class, 'sanitiseClassName'], $classes);

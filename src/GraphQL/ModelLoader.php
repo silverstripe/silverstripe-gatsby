@@ -51,7 +51,7 @@ class ModelLoader implements SchemaUpdater
      * @throws ReflectionException
      * @throws SchemaBuilderException
      */
-    public static function updateSchema(Schema $schema): void
+    public static function updateSchema(Schema $schema, array $config = []): void
     {
         $classes = static::getIncludedClasses();
         $schema->addType(Type::create('GatsbyFile', [
