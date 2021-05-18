@@ -15,7 +15,8 @@
     "require": {
         "silverstripe/cms": "^4.4",
         "silverstripe/graphql": "4.x-dev",
-        "silverstripe/cms-events": "*"
+        "silverstripe/cms-events": "*",
+        "sminnee/silverstripe-apikey": "dev-master"
     },
     "autoload": {
         "psr-4": {
