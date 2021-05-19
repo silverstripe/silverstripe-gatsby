@@ -13,7 +13,8 @@ modelConfig:
       TypeAncestry: '[[String]]'
     plugins:
       versioning: false
-      #hideGhostNodes: true
+      inheritance:
+        useUnionQueries: false
     operations:
       read:
         plugins:

@@ -8,21 +8,16 @@ use SilverStripe\Assets\File;
 use SilverStripe\CMS\Model\SiteTree;
 use SilverStripe\Core\ClassInfo;
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Core\Extensible;
 use SilverStripe\Core\Injector\Injector;
-use SilverStripe\Gatsby\Config;
 use SilverStripe\GraphQL\Schema\DataObject\DataObjectModel;
 use SilverStripe\GraphQL\Schema\DataObject\InheritanceUnionBuilder;
 use SilverStripe\GraphQL\Schema\DataObject\InterfaceBuilder;
 use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
-use SilverStripe\GraphQL\Schema\Field\ModelField;
 use SilverStripe\GraphQL\Schema\Interfaces\SchemaUpdater;
 use SilverStripe\GraphQL\Schema\Schema;
-use SilverStripe\GraphQL\Schema\StorableSchema;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\DataObject;
-use SilverStripe\Versioned\Versioned;
 use ReflectionException;
 
 class ModelLoader implements SchemaUpdater
@@ -88,9 +83,9 @@ class ModelLoader implements SchemaUpdater
 
                     if ($sng instanceof SiteTree) {
                         $modelName = $schema->getConfig()->getTypeNameForClass(SiteTree::class);
-                        $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
-                        $model->getFieldByName('childNodes')->setType("[$unionName]");
-                        $model->getFieldByName('parentNode')->setType($unionName);
+                        $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
+                        $model->getFieldByName('childNodes')->setType("[$interfaceName]");
+                        $model->getFieldByName('parentNode')->setType($interfaceName);
                         $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
                         $model->addField('breadcrumbs', [
                             'type' => "[$interfaceName]",
@@ -98,9 +93,9 @@ class ModelLoader implements SchemaUpdater
                         ]);
                     } elseif ($sng instanceof File) {
                         $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
-                        $unionName = InheritanceUnionBuilder::unionName($modelName, $schema->getConfig());
-                        $model->getFieldByName('childNodes')->setType("[$unionName]");
-                        $model->getFieldByName('parentNode')->setType($unionName);
+                        $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
+                        $model->getFieldByName('childNodes')->setType("[$interfaceName]");
+                        $model->getFieldByName('parentNode')->setType($interfaceName);
                     }
 
                 }

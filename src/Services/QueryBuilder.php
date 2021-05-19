@@ -85,9 +85,9 @@ class QueryBuilder
         }
         $namedQueryType = TypeReference::create($queryField->getType())->getNamedType();
         $queryReturnType = $this->getSchema()->getType($namedQueryType);
-        if ($queryReturnType instanceof UnionType) {
-            $types = $queryReturnType->getTypes();
-            return $this->createUnionQuery($queryName, $types);
+        if ($queryReturnType instanceof InterfaceType) {
+            $types = $this->schema->getImplementations($queryReturnType)->objects();
+            return $this->createInterfaceQuery($queryName, $types);
         }
         /* @var ObjectType $queryReturnType */
         if (!$queryReturnType instanceof ObjectType) {
@@ -118,7 +118,7 @@ GRAPHQL;
      * @param ObjectType[] $types
      * @return string
      */
-    private function createUnionQuery(string $queryName, array $types): string
+    private function createInterfaceQuery(string $queryName, array $types): string
     {
         $commonFields = $this->getDefaultFields();
         $base = $this->getBaseType();
@@ -209,7 +209,6 @@ GRAPHQL;
 
         return $selectFields;
     }
-
 
     /**
      * @return GraphQLSchema

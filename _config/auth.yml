@@ -1,0 +1,5 @@
+SilverStripe\Core\Injector\Injector:
+  SilverStripe\Control\Director:
+    properties:
+      Middlewares:
+        CustomMiddleware: '%$Sminnee\ApiKey\ApiKeyRequestMiddleware'
