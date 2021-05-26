@@ -39,7 +39,7 @@ type <?= $type->getName() ?> <?php if (!empty($type->getInterfaces())): ?>implem
 <?php endforeach; ?>
 
 <?php foreach($interfaces as $interface): ?>
-interface <?= $interface->getName() ?>  {
+interface <?= $interface->getName() ?> implements Node @dontInfer {
     <?php if (!$interface->getFieldByName('id')): ?>
         id: ID!
     <?php endif; ?>

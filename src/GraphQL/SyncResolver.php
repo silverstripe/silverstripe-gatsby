@@ -105,6 +105,7 @@ class SyncResolver
                 'DataObject',
                 'id: hashID'
             );
+            $queryBuilder->setNestedSelector('id: hashID __typename');
             $query = $queryBuilder->createQuery($queryName);
             if (!$query) {
                 continue;

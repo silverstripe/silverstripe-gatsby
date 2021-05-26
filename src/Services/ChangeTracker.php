@@ -4,6 +4,7 @@
 namespace SilverStripe\Gatsby\Services;
 
 
+use SilverStripe\Assets\File;
 use SilverStripe\Core\Injector\Injectable;
 use SilverStripe\EventDispatcher\Dispatch\Dispatcher;
 use SilverStripe\EventDispatcher\Symfony\Event;
@@ -76,13 +77,19 @@ class ChangeTracker
                 'Stage' => $stage,
             ])->removeAll();
 
-            PublishQueueItem::create([
+            $item = PublishQueueItem::create([
                 'ObjectClass' => $class,
                 'ObjectID' => $id,
                 'Type' => $event,
                 'Stage' => $stage,
                 'ObjectHash' => $hash,
-            ])->write();
+            ]);
+
+            if ($class === File::class || is_subclass_of($class, File::class)) {
+                $file = File::get_by_id($id);
+                $item->Size = $file->getAbsoluteSize();
+            }
+            $item->write();
         }
         if (!empty(self::$queue)) {
             Dispatcher::singleton()->trigger(

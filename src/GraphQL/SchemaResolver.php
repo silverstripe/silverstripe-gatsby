@@ -4,9 +4,11 @@
 namespace SilverStripe\Gatsby\GraphQL;
 
 
+use Psr\SimpleCache\InvalidArgumentException;
 use Psr\SimpleCache\CacheInterface;
 use SilverStripe\Assets\File;
 use SilverStripe\Core\Injector\Injector;
+use SilverStripe\GraphQL\Schema\Exception\SchemaBuilderException;
 use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\SchemaBuilder;
 use SilverStripe\GraphQL\Schema\Storage\Encoder;
@@ -18,6 +20,8 @@ class SchemaResolver
      * @param $obj
      * @param $args
      * @return array
+     * @throws InvalidArgumentException
+     * @throws SchemaBuilderException
      */
     public static function resolveSchema($obj, $args): array
     {
@@ -129,7 +133,7 @@ class SchemaResolver
 
         $typeNames = array_filter(array_map(function ($type) {
             return $type instanceof InputType ? null : $type->getName();
-        }, array_merge($types, $unions)));
+        }, array_merge($types, $interfaces, $unions)));
 
         $response = [
             'schema' => $encoder->encode(),

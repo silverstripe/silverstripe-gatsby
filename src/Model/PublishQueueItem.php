@@ -17,6 +17,7 @@ class PublishQueueItem extends DataObject
         'Type' => "Enum('" . ChangeTracker::TYPE_UPDATED . ", " . ChangeTracker::TYPE_DELETED . "')",
         'Stage' => "Enum('" . Versioned::DRAFT . ", " . Versioned::LIVE . ", " . ChangeTracker::STAGE_ALL . "')",
         'ObjectHash' => 'Varchar',
+        'Size' => 'Int',
     ];
 
     private static $has_one = [
@@ -30,7 +31,7 @@ class PublishQueueItem extends DataObject
         'ObjectHash' => true,
         'Object' => [
             'type' => 'unique',
-            'columns' => ['ObjectID', 'ObjectClass', 'Stage'],
+            'columns' => ['ObjectHash', 'Stage'],
         ]
     ];
 
@@ -39,9 +40,9 @@ class PublishQueueItem extends DataObject
      */
     private static $summary_fields = [
         'Type' => 'Type',
+        'Object.Title' => 'Title',
         'ObjectClass' => 'Class',
         'ObjectID' => 'ID',
-        'Object.Title' => 'Title',
     ];
 
     /**
@@ -52,12 +53,12 @@ class PublishQueueItem extends DataObject
     /**
      * @var string
      */
-    private static $singular_name = 'CMSEditHistory';
+    private static $singular_name = 'Publish Queue Item';
 
     /**
      * @var string
      */
-    private static $plural_name = 'CMSEditHistory';
+    private static $plural_name = 'Publish Queue Items';
 
     /**
      * @var string

@@ -76,8 +76,11 @@ class ModelLoader implements SchemaUpdater
                     $sng = Injector::inst()->get($model->getModel()->getSourceClass());
 
                     if ($sng instanceof File) {
-                        $model->addField('absoluteLink', 'String');
-                        $model->addField('localFile', 'GatsbyFile');
+                        $model
+                            ->addField('absoluteLink', 'String')
+                            ->addField('localFile', 'GatsbyFile')
+                            ->addField('hash', 'String')
+                            ->addField('filename', 'String');
                     }
                     // Special case for core hierarchies
 
