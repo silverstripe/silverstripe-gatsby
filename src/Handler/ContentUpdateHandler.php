@@ -16,16 +16,7 @@ class ContentUpdateHandler implements EventHandlerInterface
     {
         $hooks = Webhook::get()->filter('Event', Webhook::EVENT_PREVIEW);
         foreach ($hooks as $hook) {
-            // todo: use a proper HTTP client
-            $url = $hook->URL;
-            $ch = curl_init();
-            curl_setopt($ch, CURLOPT_URL, $url);
-            if ($hook->Method === 'POST') {
-                curl_setopt($ch, CURLOPT_POST, 1);
-            }
-            curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-            curl_exec($ch);
-            curl_close($ch);
+            $hook->invoke();
         }
     }
 
