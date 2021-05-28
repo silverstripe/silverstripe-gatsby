@@ -1,5 +1,5 @@
 ---
-Name: silverstripe-gatsby
+Name: silverstripe-gatsby-graphql
 ---
 SilverStripe\Control\Director:
   rules:

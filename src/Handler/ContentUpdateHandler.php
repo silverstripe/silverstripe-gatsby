@@ -5,7 +5,7 @@ namespace SilverStripe\Gatsby\Handler;
 
 use SilverStripe\EventDispatcher\Event\EventContextInterface;
 use SilverStripe\EventDispatcher\Event\EventHandlerInterface;
-use SilverStripe\Gatsby\Model\Webhook;
+use SilverStripe\Headless\Model\Webhook;
 
 class ContentUpdateHandler implements EventHandlerInterface
 {

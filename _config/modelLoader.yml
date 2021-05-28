@@ -1,5 +1,5 @@
 ---
-Name: modelloader-excludes
+Name: silverstripe-gatsby-modelloader
 ---
 SilverStripe\Gatsby\GraphQL\ModelLoader:
   excluded_dataobjects:

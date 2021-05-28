@@ -10,7 +10,7 @@ use SilverStripe\Forms\GridField\GridFieldFilterHeader;
 use SilverStripe\Forms\GridField\GridFieldImportButton;
 use SilverStripe\Forms\GridField\GridFieldPrintButton;
 use SilverStripe\Gatsby\GridField\SyncPreviewFilterButton;
-use SilverStripe\Gatsby\Model\PublishQueueItem;
+use SilverStripe\Headless\Model\PublishQueueItem;
 
 class SyncPreviewAdmin extends ModelAdmin
 {

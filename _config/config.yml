@@ -1,10 +1,6 @@
 ---
 Name: silverstripe-gatsby-config
 ---
-SilverStripe\ORM\DataObject:
-  extensions:
-    - SilverStripe\Gatsby\Extensions\DataObjectExtension
-    - SilverStripe\Gatsby\Extensions\SiteTreeExtension
 SilverStripe\Assets\File:
   extensions:
     - SilverStripe\Gatsby\Extensions\UsedFileExtension

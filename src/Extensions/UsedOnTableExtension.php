@@ -3,7 +3,7 @@
 
 namespace SilverStripe\Gatsby\Extensions;
 
-use SilverStripe\Gatsby\Model\PublishQueueItem;
+use SilverStripe\Headless\Model\PublishQueueItem;
 use SilverStripe\ORM\DataExtension;
 
 class UsedOnTableExtension extends DataExtension

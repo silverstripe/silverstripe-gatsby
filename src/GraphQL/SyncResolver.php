@@ -3,8 +3,8 @@
 namespace SilverStripe\Gatsby\GraphQL;
 
 use SilverStripe\Core\Config\Configurable;
-use SilverStripe\Gatsby\Model\PublishQueueItem;
-use SilverStripe\Gatsby\Services\ChangeTracker;
+use SilverStripe\Headless\Model\PublishQueueItem;
+use SilverStripe\Headless\Services\ChangeTracker;
 use SilverStripe\Gatsby\Services\QueryBuilder;
 use SilverStripe\GraphQL\QueryHandler\QueryHandler;
 use SilverStripe\GraphQL\QueryHandler\QueryStateProvider;

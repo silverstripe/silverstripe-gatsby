@@ -1,5 +1,5 @@
 ---
-Name: gatsby-cache
+Name: silverstripe-gatsby-cache
 ---
 SilverStripe\Core\Injector\Injector:
   Psr\SimpleCache\CacheInterface.SchemaResolver:
