@@ -1,5 +1,6 @@
 ---
 Name: silverstripe-gatsby-menu
+before: silverstripe-headless-menu
 ---
 SilverStripe\Admin\LeftAndMain:
   menu_groups:
@@ -7,6 +8,3 @@ SilverStripe\Admin\LeftAndMain:
       icon: 'integration'
       children:
         - SilverStripe-Gatsby-Admins-SyncPreviewAdmin
-        - SilverStripe-Gatsby-Admins-AwaitingPublicationAdmin
-        - SilverStripe-Gatsby-Admins-PublishHistoryAdmin
-        - SilverStripe-Gatsby-Admins-WebhooksAdmin

@@ -18,9 +18,10 @@ use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\Type\ModelType;
 use SilverStripe\GraphQL\Schema\Type\Type;
 use SilverStripe\ORM\DataObject;
+use SilverStripe\Headless\GraphQL\ModelLoader as BaseModelLoader;
 use ReflectionException;
 
-class ModelLoader implements SchemaUpdater
+class ModelLoader extends BaseModelLoader
 {
     use Configurable;
 
@@ -48,7 +49,10 @@ class ModelLoader implements SchemaUpdater
      */
     public static function updateSchema(Schema $schema, array $config = []): void
     {
+        parent::updateSchema($schema, $config);
+
         $classes = static::getIncludedClasses();
+
         $schema->addType(Type::create('GatsbyFile', [
             'fields' => [
                 'hashID' => 'ID',
@@ -58,10 +62,8 @@ class ModelLoader implements SchemaUpdater
         foreach ($classes as $class) {
             $schema->addModelbyClassName($class, function (ModelType $model) use ($schema) {
                 $model->addAllFields();
-                // Special case for link
-                if ($model->getModel()->hasField('link')) {
-                    $model->addField('link', 'String');
-                }
+                $sng = Injector::inst()->get($model->getModel()->getSourceClass());
+
                 if ($model->getModel()->hasField('parent')) {
                     $model->removeField('parent');
                     $model->addField('parentNode', [
@@ -73,14 +75,10 @@ class ModelLoader implements SchemaUpdater
                     $model->addField('childNodes', [
                         'property' => 'Children',
                     ]);
-                    $sng = Injector::inst()->get($model->getModel()->getSourceClass());
+
 
                     if ($sng instanceof File) {
-                        $model
-                            ->addField('absoluteLink', 'String')
-                            ->addField('localFile', 'GatsbyFile')
-                            ->addField('hash', 'String')
-                            ->addField('filename', 'String');
+                        $model->addField('localFile', 'GatsbyFile');
                     }
                     // Special case for core hierarchies
 
@@ -89,23 +87,17 @@ class ModelLoader implements SchemaUpdater
                         $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
                         $model->getFieldByName('childNodes')->setType("[$interfaceName]");
                         $model->getFieldByName('parentNode')->setType($interfaceName);
-                        $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
-                        $model->addField('breadcrumbs', [
-                            'type' => "[$interfaceName]",
-                            'property' => 'NavigationPath',
-                        ]);
                     } elseif ($sng instanceof File) {
                         $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
                         $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
                         $model->getFieldByName('childNodes')->setType("[$interfaceName]");
                         $model->getFieldByName('parentNode')->setType($interfaceName);
                     }
-
                 }
 
                 $model->addOperation('read', [
                     'plugins' => [
-                        'canView' => false //Config::config()->get('public_only'),
+                        'canView' => false
                     ]
                 ]);
             });
@@ -113,43 +105,9 @@ class ModelLoader implements SchemaUpdater
     }
 
     /**
-     * @todo Make configurable
+     * @param Schema $schema
      * @return array
-     * @throws ReflectionException
      */
-    public static function getIncludedClasses(): array
-    {
-        if (self::$_cachedIncludedClasses) {
-            return self::$_cachedIncludedClasses;
-        }
-        $blacklist = static::config()->get('excluded_dataobjects');
-        $whitelist = static::config()->get('included_dataobjects');
-
-        $classes = array_values(ClassInfo::subclassesFor(DataObject::class, false));
-        $classes = array_filter($classes, function ($class) use ($blacklist, $whitelist) {
-            $included = empty($whitelist);
-            foreach ($whitelist as $pattern) {
-                if (fnmatch($pattern, $class, FNM_NOESCAPE)) {
-                    $included = true;
-                    break;
-                }
-            }
-            foreach ($blacklist as $pattern) {
-                if (fnmatch($pattern, $class, FNM_NOESCAPE)) {
-                    $included = false;
-                }
-            }
-
-            return $included;
-        });
-        sort($classes);
-        $classes = array_combine($classes, $classes);
-        self::$_cachedIncludedClasses = $classes;
-
-        return $classes;
-    }
-
-
     public static function getDirectives(Schema $schema): array
     {
         $directives = [];
@@ -218,21 +176,6 @@ class ModelLoader implements SchemaUpdater
 
         return null;
 
-    }
-
-    /**
-     * @param DataObject $obj
-     * @return bool
-     * @throws ReflectionException
-     */
-    public static function includes(DataObject $obj): bool
-    {
-        $included =  true;
-        $obj->invokeWithExtensions('updateModelLoaderIncluded', $included);
-        if (!$included) {
-            return false;
-        }
-        return in_array($obj->ClassName, static::getIncludedClasses());
     }
 
     /**

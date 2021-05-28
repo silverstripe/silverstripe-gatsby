@@ -3,19 +3,4 @@ Name: modelloader-excludes
 ---
 SilverStripe\Gatsby\GraphQL\ModelLoader:
   excluded_dataobjects:
-    security: 'SilverStripe\Security\*'
-    versioned: 'SilverStripe\Versioned\*'
-    shortcodes: 'SilverStripe\Assets\Shortcodes\*'
-    siteTreeLink: 'SilverStripe\CMS\Model\SiteTreeLink'
     cmsEditHistory: 'SilverStripe\Gatsby\*'
-    apiKey: 'Sminnee\ApiKey\*'
-    errorPage: 'SilverStripe\ErrorPage\*'
-    folder: 'SilverStripe\Assets\Folder'
----
-Name: modelloader-exclude-snapshots
-Only:
-  moduleexists: 'silverstripe/versioned-snapshots'
----
-SilverStripe\Gatsby\GraphQL\ModelLoader:
-  excluded_dataobjects:
-    snapshots: 'SilverStripe\Snapshots\*'

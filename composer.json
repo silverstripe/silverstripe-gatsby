@@ -14,12 +14,7 @@
     ],
     "require": {
         "silverstripe/cms": "^4.4",
-        "silverstripe/graphql": "4.x-dev",
-        "silverstripe/cms-events": "*",
-        "guzzlehttp/guzzle": "~6.0",
-        "unclecheese/display-logic": "~2.0",
-        "sminnee/silverstripe-apikey": "dev-master",
-        "symbiote/silverstripe-grouped-cms-menu": "^4"
+        "silverstripe/silverstripe-headless": "dev-master"
     },
     "autoload": {
         "psr-4": {
