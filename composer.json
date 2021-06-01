@@ -14,7 +14,7 @@
     ],
     "require": {
         "silverstripe/cms": "^4.4",
-        "silverstripe/silverstripe-headless": "dev-master"
+        "silverstripe/silverstripe-headless": "dev-main"
     },
     "autoload": {
         "psr-4": {
