@@ -13,6 +13,8 @@ use SilverStripe\GraphQL\Schema\Schema;
 use SilverStripe\GraphQL\Schema\SchemaBuilder;
 use SilverStripe\GraphQL\Schema\Storage\Encoder;
 use SilverStripe\GraphQL\Schema\Type\InputType;
+use SilverStripe\GraphQL\Schema\Type\ModelInterfaceType;
+use SilverStripe\GraphQL\Schema\Type\ModelType;
 
 class SchemaResolver
 {
@@ -51,15 +53,26 @@ class SchemaResolver
         }
 
         $fileTypes = [];
+        $fileTypeNames = [];
         foreach ($baseSchema->getModels() as $modelType) {
             $class = $modelType->getModel()->getSourceClass();
             if ($class === File::class || is_subclass_of($class, File::class)) {
-                $fileTypes[] = $renamed[$modelType->getName()] ?? $modelType->getName();
+                $fileTypes[] = $modelType;
+                $fileTypeNames[] = $renamed[$modelType->getName()] ?? $modelType->getName();
+            }
+        }
+        foreach ($baseSchema->getInterfaces() as $interfaceType) {
+            if (!$interfaceType instanceof ModelInterfaceType) {
+                continue;
+            }
+            /* @var ModelInterfaceType $interfaceType */
+            $class = $interfaceType->getCanonicalModel()->getModel()->getSourceClass();
+            if ($class === File::class || is_subclass_of($class, File::class)) {
+                $fileTypes[] = $interfaceType;
             }
         }
 
-        // Deal with the naming collision of File
-        $renamed['GatsbyFile'] = 'File';
+
         $skip = ['GatsbyFile'];
 
         foreach ($allTypes as $type) {
@@ -118,6 +131,15 @@ class SchemaResolver
 
             $unions[] = $union;
         }
+
+        /* @var ModelInterfaceType|ModelType $fileType */
+        foreach ($fileTypes as $fileType) {
+            if ($field = $fileType->getFieldByName('localFile')) {
+                // Force this to the native Gatsby file type
+                $field->setType('File');
+            }
+        }
+
         $encoder = Encoder::create(
             __DIR__ . '/../../includes/schema.inc.php',
             $schema,
@@ -138,7 +160,7 @@ class SchemaResolver
         $response = [
             'schema' => $encoder->encode(),
             'types' => $typeNames,
-            'files' => $fileTypes,
+            'files' => $fileTypeNames,
         ];
 
         $cache->set($prefix, $response);
