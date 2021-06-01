@@ -58,47 +58,50 @@ class ModelLoader extends BaseModelLoader
         ]));
 
         foreach ($classes as $class) {
-            $schema->addModelbyClassName($class, function (ModelType $model) use ($schema) {
-                $model->addAllFields();
-                $sng = Injector::inst()->get($model->getModel()->getSourceClass());
+            $model = $schema->getModelByClassName($class);
+            if (!$model) {
+                continue;
+            }
 
-                if ($model->getModel()->hasField('parent')) {
-                    $model->removeField('parent');
-                    $model->addField('parentNode', [
-                        'property' => 'Parent',
-                    ]);
-                }
-                if ($model->getModel()->hasField('children')) {
-                    $model->removeField('children');
-                    $model->addField('childNodes', [
-                        'property' => 'Children',
-                    ]);
+            $sng = Injector::inst()->get($model->getModel()->getSourceClass());
 
-
-                    if ($sng instanceof File) {
-                        $model->addField('localFile', 'GatsbyFile');
-                    }
-                    // Special case for core hierarchies
-
-                    if ($sng instanceof SiteTree) {
-                        $modelName = $schema->getConfig()->getTypeNameForClass(SiteTree::class);
-                        $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
-                        $model->getFieldByName('childNodes')->setType("[$interfaceName]");
-                        $model->getFieldByName('parentNode')->setType($interfaceName);
-                    } elseif ($sng instanceof File) {
-                        $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
-                        $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
-                        $model->getFieldByName('childNodes')->setType("[$interfaceName]");
-                        $model->getFieldByName('parentNode')->setType($interfaceName);
-                    }
-                }
-
-                $model->addOperation('read', [
-                    'plugins' => [
-                        'canView' => false
-                    ]
+            if ($model->getModel()->hasField('parent')) {
+                $model->removeField('parent');
+                $model->addField('parentNode', [
+                    'property' => 'Parent',
                 ]);
-            });
+            }
+            if ($model->getModel()->hasField('children')) {
+                $model->removeField('children');
+                $model->addField('childNodes', [
+                    'property' => 'Children',
+                ]);
+
+
+                if ($sng instanceof File) {
+                    $model->addField('localFile', 'GatsbyFile');
+                }
+                // Special case for core hierarchies
+
+                if ($sng instanceof SiteTree) {
+                    $modelName = $schema->getConfig()->getTypeNameForClass(SiteTree::class);
+                    $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
+                    $model->getFieldByName('childNodes')->setType("[$interfaceName]");
+                    $model->getFieldByName('parentNode')->setType($interfaceName);
+                } elseif ($sng instanceof File) {
+                    $modelName = $schema->getConfig()->getTypeNameForClass(File::class);
+                    $interfaceName = InterfaceBuilder::interfaceName($modelName, $schema->getConfig());
+                    $model->getFieldByName('childNodes')->setType("[$interfaceName]");
+                    $model->getFieldByName('parentNode')->setType($interfaceName);
+                }
+            }
+
+            $model->addOperation('read', [
+                'plugins' => [
+                    'canView' => false
+                ]
+            ]);
+
         }
     }
 
