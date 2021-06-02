@@ -7,3 +7,5 @@ SilverStripe\Assets\File:
 SilverStripe\Admin\Forms\UsedOnTable:
   extensions:
     - SilverStripe\Gatsby\Extensions\UsedOnTableExtension
+SilverStripe\ORM\DataObject:
+  headless_schema: gatsby
